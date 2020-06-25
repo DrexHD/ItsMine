@@ -1,0 +1,38 @@
+{
+  "required": true,
+  "package": "me.drexhd.itsmine.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "LevelStorageSessionMixin",
+    "CommandManagerMixin",
+    "BlockUpdatePacketMixin",
+    "BucketItemMixin",
+    "BlockActionPacketMixin",
+    "ServerWorldMixin",
+    "ExplosionMixin",
+    "PlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "FluidMixin",
+    "LavaMixin",
+    "PistonBlockMixin",
+    "ServerPlayerInteractionManagerMixin",
+    "PlaceOnUseBlockMixin",
+    "SpawnRestrictionMixin",
+    "projectile.OwnedProjectile",
+    "projectile.ProjectileEntityMixin",
+    "projectile.TridentEntityMixin",
+    "projectile.ThrownEggEntityMixin",
+    "projectile.SnowballEntityMixin",
+    "projectile.ThrownEnderpearlEntityMixin",
+    "EnderPearlItemMixin",
+    "StickClaimItemMixin",
+    "EntityMixin",
+    "EnderDragonEntityMixin",
+    "FarmlandBlockMixin",
+    "ServerCommandOutputMixin",
+    "MinecraftServerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

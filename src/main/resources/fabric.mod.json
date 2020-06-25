@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "itsmine",
+  "version": "${version}",
+
+  "name": "Its Mine!",
+  "description": "Land claims.",
+  "authors": [
+    "DrexHD"
+  ],
+  "contact": {
+    "sources": "https://github.com/DrexHD/NoGrief/"
+  },
+
+  "license": "CC0-1.0",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.drexhd.itsmine.ItsMine"
+    ]
+  },
+  "mixins": [
+    "itsmine.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.1+build.174"
+  },
+  "suggests": {
+    "luckperms": "*"
+  }
+}
