@@ -22,7 +22,7 @@ public class EnderPearlItemMixin {
         ItemStack itemStack = user.getStackInHand(hand);
         Claim claim = ClaimManager.INSTANCE.getClaimAt(user.getBlockPos(), user.world.getDimension());
 
-        if (claim != null && !claim.hasPermission(user.getUuid(), "use_item", "enderpearl")) {
+        if (claim != null && !claim.hasPermission(user.getUuid(), "use_item", "ender_pearl")) {
             user.sendSystemMessage(Messages.MSG_CANT_USE, user.getUuid());
             cir.setReturnValue(TypedActionResult.fail(itemStack));
         }

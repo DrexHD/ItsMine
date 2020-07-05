@@ -14,10 +14,9 @@ public class BlockUtil {
                 isEnderchest(block) ||
                 isShulkerBox(block) ||
                 isFurnace(block) ||
-                block == Blocks.HOPPER ||
-                block == Blocks.BREWING_STAND ||
-                block == Blocks.DISPENSER ||
-                block == Blocks.DROPPER;
+                block instanceof HopperBlock ||
+                block instanceof BrewingStandBlock ||
+                block instanceof DispenserBlock;
     }
 
     public static boolean isBlockEntity(Block block) {
@@ -31,12 +30,14 @@ public class BlockUtil {
 
     public static boolean isFurnace(Block block) { return block instanceof AbstractFurnaceBlock; }
 
+    public static boolean isSign(Block block) { return block instanceof AbstractSignBlock; }
+
     public static boolean isChest(Block block) {
         return block == Blocks.CHEST || block == Blocks.BARREL;
     }
 
     public static boolean isEnderchest(Block block) {
-        return block == Blocks.ENDER_CHEST;
+        return block instanceof EnderChestBlock;
     }
 
     public static boolean isShulkerBox(Block block) {
@@ -53,5 +54,32 @@ public class BlockUtil {
 
     public static boolean isTrapdoor(Block block) {
         return block instanceof TrapdoorBlock;
+    }
+
+    public static boolean isCake(Block block) {
+        return block instanceof CakeBlock;
+    }
+
+    public static boolean isRedstoneWire(Block block) {
+        return block instanceof RedstoneWireBlock;
+    }
+
+    public static boolean isBed(Block block) {
+        return block instanceof BedBlock;
+    }
+
+    public static boolean isInteractAble(Block block) {
+        return isBlockEntity(block) ||
+                isRedstoneWire(block) ||
+                isCake(block) ||
+                isButton(block) ||
+                isDoor(block) ||
+                isTrapdoor(block) ||
+                isContainer(block) ||
+                isSign(block) ||
+                isBed(block);
+
+
+
     }
 }

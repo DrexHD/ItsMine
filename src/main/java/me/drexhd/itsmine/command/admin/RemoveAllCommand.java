@@ -18,7 +18,7 @@ import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.text.DecimalFormat;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -49,14 +49,20 @@ public class RemoveAllCommand {
         int claims = 0;
         int subzones = 0;
 
-        for(Iterator<Claim> claimIterator = ClaimManager.INSTANCE.getClaimList().iterator(); claimIterator.hasNext();) {
-            Claim claim = claimIterator.next();
-            if(claim.dimension.equals(dimensionType)) {
+
+        ArrayList<Claim> remove = new ArrayList<>();
+        for (Claim claim : ClaimManager.INSTANCE.getClaimList()) {
+            if (claim.dimension.equals(dimensionType)) {
+                /*We add the claims which are supposed to get removed to a separate Arraylist, to avoid a ConcurrentModificationException */
+                remove.add(claim);
                 ClaimManager.INSTANCE.releaseBlocksToOwner(claim);
-                claimIterator.remove();
-                if(claim.isChild) subzones++;
+                if (claim.isChild) subzones++;
                 else claims++;
             }
+        }
+
+        for (Claim claim : remove) {
+            ClaimManager.INSTANCE.removeClaim(claim);
         }
 
         stopWatch.stop();
@@ -70,19 +76,24 @@ public class RemoveAllCommand {
         stopWatch.start();
         ServerCommandSource source = context.getSource();
         GameProfile gameProfile = ArgumentUtil.getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
-        if(gameProfile == null || !gameProfile.isComplete()) {
+        if (gameProfile == null || !gameProfile.isComplete()) {
             return 0;
         }
         int claims = 0;
         int subzones = 0;
-        for(Iterator<Claim> claimIterator = ClaimManager.INSTANCE.getClaimList().iterator(); claimIterator.hasNext();) {
-            Claim claim = claimIterator.next();
-            if(claim.claimBlockOwner != null && claim.claimBlockOwner.equals(gameProfile.getId())) {
+        ArrayList<Claim> remove = new ArrayList<>();
+        for (Claim claim : ClaimManager.INSTANCE.getClaimList()) {
+            if (claim.claimBlockOwner != null && claim.claimBlockOwner.equals(gameProfile.getId())) {
+                /*We add the claims which are supposed to get removed to a separate Arraylist, to avoid a ConcurrentModificationException */
+                remove.add(claim);
                 ClaimManager.INSTANCE.releaseBlocksToOwner(claim);
-                claimIterator.remove();
-                if(claim.isChild) subzones++;
+                if (claim.isChild) subzones++;
                 else claims++;
             }
+        }
+
+        for (Claim claim : remove) {
+            ClaimManager.INSTANCE.removeClaim(claim);
         }
         stopWatch.stop();
         String timeElapsed = new DecimalFormat("##.##").format(stopWatch.getTime(TimeUnit.MILLISECONDS));

@@ -49,7 +49,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements ClaimSho
         PlayerEntity playerEntity_1 = (PlayerEntity)(Object)this;
         Claim claim = ClaimManager.INSTANCE.getClaimAt(entity.getBlockPos(), entity.world.getDimension());
 
-        if (claim != null && !EntityUtil.canAttack(((PlayerEntity) (Object) this).getUuid(), claim, entity)) {
+        if (claim != null && !EntityUtil.canDamage(((PlayerEntity) (Object) this).getUuid(), claim, entity)) {
             playerEntity_1.sendSystemMessage(Messages.MSG_DAMAGE_ENTITY, playerEntity_1.getUuid());
             ci.cancel();
         }

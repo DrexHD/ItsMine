@@ -1,9 +1,5 @@
 package me.drexhd.itsmine.config;
 
-import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.DataFixerBuilder;
 import me.drexhd.itsmine.config.sections.DefaultClaimBlockSection;
 import me.drexhd.itsmine.config.sections.MessageSection;
 import me.drexhd.itsmine.config.sections.RentSection;

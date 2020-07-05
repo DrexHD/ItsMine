@@ -1,7 +1,6 @@
 package me.drexhd.itsmine;
 
 import com.google.common.reflect.TypeToken;
-import me.drexhd.itsmine.config.Config;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -14,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ItsMineConfig {
-    private static Config config;
+    private static me.drexhd.itsmine.config.Config config;
     private static ConfigurationNode mainNode;
 
     public ItsMineConfig() {
@@ -30,7 +29,7 @@ public class ItsMineConfig {
 
             mainNode = mainLoader.load(configurationOptions());
 
-            config = mainNode.getValue(TypeToken.of(Config.class), new Config());
+            config = mainNode.getValue(TypeToken.of(me.drexhd.itsmine.config.Config.class), new me.drexhd.itsmine.config.Config());
 
             mainLoader.save(mainNode);
 
@@ -41,7 +40,7 @@ public class ItsMineConfig {
         }
     }
 
-    public static Config main() {
+    public static me.drexhd.itsmine.config.Config main() {
         return config;
     }
 
@@ -49,27 +48,14 @@ public class ItsMineConfig {
         return mainNode;
     }
 
-    public static void abc(){
-        System.out.println("running");
-        System.out.println(mainNode.getNode("messages"));
-        System.out.println(mainNode.getNode("messages","noPermission"));
-
-
-        for(ConfigurationNode node : mainNode.getChildrenList()){
-            System.out.println(node + ": " + node.getValue());
-        }
-    }
 
     public static void reload() {
-        System.out.println("reloading");
         new ItsMineConfig();
-        abc();
-        System.out.println("2");
     }
 
     public static ConfigurationOptions configurationOptions() {
         return ConfigurationOptions.defaults()
-                .setHeader(Config.HEADER)
+                .setHeader(me.drexhd.itsmine.config.Config.HEADER)
                 .setObjectMapperFactory(DefaultObjectMapperFactory.getInstance())
                 .setShouldCopyDefaults(true);
     }

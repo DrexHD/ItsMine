@@ -48,7 +48,6 @@ public abstract class ServerPlayerInteractionManagerMixin {
         blockPos = hitResult.getBlockPos().offset(hitResult.getSide());
     }
 
-
     /*Check whether or not the player can interact with the block he is clicking*/
     @Redirect(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onUse(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
         private ActionResult interactIfPossible(BlockState blockState, World world, PlayerEntity player, Hand hand, BlockHitResult hit){
@@ -57,13 +56,14 @@ public abstract class ServerPlayerInteractionManagerMixin {
         if (claim != null) {
             UUID uuid = player.getUuid();
             Block block = blockState.getBlock();
-            if ((BlockUtil.isBlockEntity(block) || BlockUtil.isShulkerBox(block) || BlockUtil.isButton(block) || BlockUtil.isTrapdoor(block) || BlockUtil.isDoor(block) || BlockUtil.isContainer(block)) && !(claim.hasPermission(uuid, "interact_block") ||
+            if ((BlockUtil.isInteractAble(block)/*isBlockEntity(block) || BlockUtil.isShulkerBox(block) || BlockUtil.isButton(block) || BlockUtil.isTrapdoor(block) || BlockUtil.isDoor(block) || BlockUtil.isContainer(block)*/) && !(claim.hasPermission(uuid, "interact_block") ||
                 claim.hasPermission(uuid, "interact_block", Registry.BLOCK.getId(block).getPath()) ||
                 (BlockUtil.isButton(block) && claim.hasPermission(uuid, "interact_block", "BUTTONS")) ||
                 (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
                 (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
                 (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
-                (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "shulker_box")))) {
+                (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) /*||
+                (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "shulker_box"))*/)) {
                 MessageUtil.sendTranslatableMessage(player, "messages", "interactBlock");
                 return ActionResult.FAIL;
             }
@@ -98,6 +98,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
 
         return stack.isEmpty();
     }
+
 
     /*Mixin to check for left click of stick (for selecting claim) and to check block breaking*/
     @Redirect(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))

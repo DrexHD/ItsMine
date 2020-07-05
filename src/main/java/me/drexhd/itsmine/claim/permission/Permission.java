@@ -1,7 +1,7 @@
 package me.drexhd.itsmine.claim.permission;
 
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntityType;
+import me.drexhd.itsmine.util.BlockUtil;
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -68,17 +68,21 @@ public enum Permission {
             }
         }}),
         BLOCK_ENTITY(new ArrayList<String>(){{
-            for(BlockEntityType blockEntityType : Registry.BLOCK_ENTITY_TYPE) {
+/*            for(BlockEntityType blockEntityType : Registry.BLOCK_ENTITY_TYPE) {
                 this.add(Registry.BLOCK_ENTITY_TYPE.getId(blockEntityType).getPath());
-            }
+            }*/
             for (Block block : Registry.BLOCK) {
-                if(block instanceof AbstractButtonBlock || block instanceof LeverBlock || block instanceof DoorBlock || block instanceof TrapdoorBlock)
+                if(BlockUtil.isInteractAble(block))
                 this.add(Registry.BLOCK.getId(block).getPath());
             }
             this.add("TRAPDOORS");
             this.add("DOORS");
             this.add("BUTTONS");
             this.add("CONTAINERS");
+            this.add("SIGNS");
+            this.remove("jigsaw");
+            this.remove("command_block");
+            this.remove("structure_block");
         }}),
         ENTITY(new ArrayList<String>(){{
             for (EntityType entityType : Registry.ENTITY_TYPE) {
