@@ -17,40 +17,54 @@ import java.util.*;
  * @author Indigo Amann
  */
 public class ClaimManager {
-    public Map<PlayerEntity, Pair<BlockPos, BlockPos>> stickPositions = new HashMap<>();
     public static ClaimManager INSTANCE = null;
-    private HashMap<UUID, Integer> blocksLeft = new HashMap<>();
+    public static MinecraftServer server;
+    public Map<PlayerEntity, Pair<BlockPos, BlockPos>> stickPositions = new HashMap<>();
     public List<UUID> ignoringClaims = new ArrayList<>();
     public List<UUID> flyers = new ArrayList<>();
-    public static MinecraftServer server;
+    private HashMap<UUID, Integer> blocksLeft = new HashMap<>();
     private ClaimList claimList = new ClaimList();
+    private int dataVersion = 1;
+
     public int getClaimBlocks(UUID id) {
         return blocksLeft.getOrDefault(id, ItsMineConfig.main().claims2d ? ItsMineConfig.main().claimBlock().default2D : ItsMineConfig.main().claimBlock().default3D);
     }
+
     public boolean useClaimBlocks(UUID player, int amount) {
         int blocks = getClaimBlocks(player) - amount;
         if (blocks < 0) return false;
         blocksLeft.put(player, blocks);
         return true;
     }
+
     public void addClaimBlocks(UUID player, int amount) {
         useBlocksUntil0(player, -amount);
     }
+
     public void addClaimBlocks(Collection<ServerPlayerEntity> players, int amount) {
         players.forEach(player -> useBlocksUntil0(player.getGameProfile().getId(), -amount));
     }
+
     public void useBlocksUntil0(UUID player, int amount) {
         if (!useClaimBlocks(player, amount)) blocksLeft.put(player, 0);
     }
+
     public void setClaimBlocks(Collection<ServerPlayerEntity> players, int amount) {
         players.forEach(player -> setClaimBlocks(player.getGameProfile().getId(), amount));
     }
 
-    public Claim getClaim(String name){
+    @Deprecated
+    public Claim getClaim(String name) {
         return claimList.get(name);
     }
 
+    public Claim getClaim(UUID uuid, String name) {
+        return claimList.get(uuid, name);
+    }
 
+    public List<Claim> getPlayerClaims(UUID id) {
+        return claimList.get(id) == null ? new ArrayList<>() : claimList.get(id);
+    }
 
     public ArrayList<Claim> getClaimList() {
         return claimList.get();
@@ -73,45 +87,53 @@ public class ClaimManager {
         if (claim.claimBlockOwner != null) addClaimBlocks(claim.claimBlockOwner, claim.getArea());
     }
 
-    public List<Claim> getPlayerClaims(UUID id) {
-        return claimList.get(id) == null ? new ArrayList<>() : claimList.get(id);
-    }
-
     public boolean addClaim(Claim claim) {
         return claimList.add(claim);
     }
+
     public boolean wouldIntersect(Claim claim) {
         for (Claim value : claimList.get()) {
-            if(!value.isChild && !claim.name.equals(value.name) && (claim.intersects(value) || value.intersects(claim))) return true;
+            if (!value.isChild && !claim.name.equals(value.name) && (claim.intersects(value) || value.intersects(claim)))
+                return true;
         }
         return false;
     }
 
     public boolean wouldSubzoneIntersect(Claim claim) {
         for (Claim value : claimList.get()) {
-                if(!claim.name.equals(value.name) && claim.intersects(value, true)){
-                    return true;
-                }
+            if (!claim.name.equals(value.name) && claim.intersects(value, true)) {
+                return true;
+            }
         }
         return false;
     }
+
     public CompoundTag toNBT() {
-        CompoundTag tag =  new CompoundTag();
-        ListTag list = new ListTag();
-        claimList.get().forEach(claim -> {
-            if(!claim.isChild){
-                list.add(claim.toTag());
+        //Main node;
+        CompoundTag root = new CompoundTag();
+        //Claim subnode
+        CompoundTag claims = new CompoundTag();
+        //Loop through all players with claims
+        for (UUID uuid : claimList.getplayers()) {
+            ListTag playerClaims = new ListTag();
+            //Loop through the player claims
+            for (Claim claim : claimList.get(uuid)) {
+                if (!claim.isChild)
+                    playerClaims.add(claim.toNBT());
             }
-        });
-        tag.put("claims", list);
+            claims.put(uuid.toString(), playerClaims);
+        }
+        root.put("claims", claims);
         CompoundTag blocksLeftTag = new CompoundTag();
-        blocksLeft.forEach((id, amount) -> {if (id != null) blocksLeftTag.putInt(id.toString(), amount);});
-        tag.put("blocksLeft", blocksLeftTag);
+        blocksLeft.forEach((id, amount) -> {
+            if (id != null) blocksLeftTag.putInt(id.toString(), amount);
+        });
+        root.put("blocksLeft", blocksLeftTag);
         ListTag ignoring = new ListTag();
-        CompoundTag tvargetter = new CompoundTag();
+        CompoundTag targets = new CompoundTag();
         ignoringClaims.forEach(id -> {
-            tvargetter.putString("id", id.toString());
-            ignoring.add(tvargetter.get("id"));
+            targets.putString("id", id.toString());
+            ignoring.add(targets.get("id"));
         });
         ListTag listTag = new ListTag();
         for (UUID flyer : flyers) {
@@ -119,34 +141,11 @@ public class ClaimManager {
             tag1.putUuid("uuid", flyer);
             listTag.add(tag1);
         }
-        tag.put("flyers", listTag);
-        tag.put("ignoring", ignoring);
-        return tag;
+        root.put("flyers", listTag);
+        root.put("ignoring", ignoring);
+        root.putInt("dataVersion", dataVersion);
+        return root;
     }
-
-/*    public Claim getMainClaimAt(BlockPos pos, DimensionType dimension){
-        for (Claim claim : claimsByName.values()) {
-            if(claim.dimension.equals(dimension) && claim.includesPosition(pos)){
-                return claim.getZoneCovering(pos);
-            }
-        }
-        return null;
-    }
-
-    public Claim getSubzoneClaimAt(BlockPos pos, DimensionType dimension) {
-        for (Claim claim : claimsByName.values()) {
-            if (claim.dimension.equals(dimension) && claim.includesPosition(pos)) {
-                for(Claim subzone : claim.children){
-                    if(subzone.dimension.equals(dimension) && subzone.includesPosition(pos)){
-                        return subzone.getZoneCovering(pos);
-                    }
-                }
-                return null;
-            }
-        }
-        return null;
-    }
-    */
 
     @Nullable
     public Claim getClaimAt(BlockPos pos, DimensionType dimension) {
@@ -155,16 +154,6 @@ public class ClaimManager {
 
 
     public void fromNBT(CompoundTag tag) {
-        ListTag list = (ListTag) tag.get("claims");
-        claimList = new ClaimList();
-        list.forEach(it -> {
-            Claim claim = new Claim();
-            claim.fromTag((CompoundTag) it);
-            claimList.add(claim);
-            for(Claim subzone : claim.subzones){
-                claimList.add(subzone);
-            }
-        });
         CompoundTag blocksLeftTag = tag.getCompound("blocksLeft");
         blocksLeft.clear();
         blocksLeftTag.getKeys().forEach(key -> blocksLeft.put(UUID.fromString(key), blocksLeftTag.getInt(key)));
@@ -176,5 +165,50 @@ public class ClaimManager {
             CompoundTag tag1 = listTag.getCompound(i);
             flyers.add(tag1.getUuid("uuid"));
         }
+        int oldDataVersion = tag.getInt("dataVersion");
+        loadClaims(tag, oldDataVersion, dataVersion);
     }
+
+    private void loadClaims(CompoundTag tag, int oldDataVersion, int dataVersion) {
+        switch (oldDataVersion) {
+            case 0: {
+                ListTag listTag = (ListTag) tag.get("claims");
+                claimList = new ClaimList();
+                listTag.forEach(claimTag -> {
+                    Claim claim = new Claim();
+                    UUID uuid;
+                    if(((CompoundTag) claimTag).contains("top_owner")) uuid = ((CompoundTag) claimTag).getUuid("top_owner");
+                    else uuid = new UUID(0, 0);
+                    claim.fromTag(uuid, (CompoundTag) claimTag);
+                    claimList.add(claim);
+                    for (Claim subzone : claim.subzones) {
+                        claimList.add(subzone);
+                    }
+                });
+                break;
+            }
+            case 1: {
+                CompoundTag compoundTag = (CompoundTag) tag.get("claims");
+                claimList = new ClaimList();
+                for (String uuid : compoundTag.getKeys()) {
+                    ListTag listTag = (ListTag) compoundTag.get(uuid);
+                    listTag.forEach(it -> {
+                        Claim claim = new Claim();
+                        claim.fromTag(UUID.fromString(uuid), (CompoundTag) it);
+                        claimList.add(claim);
+                        for (Claim subzone : claim.subzones) {
+                            claimList.add(subzone);
+                        }
+                    });
+                }
+                break;
+            }
+            default:
+                throw new RuntimeException("Invalid dataVersion " + dataVersion);
+        }
+        if (oldDataVersion != dataVersion) {
+            fromNBT(toNBT());
+        }
+    }
+
 }
