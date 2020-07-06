@@ -19,6 +19,7 @@ import java.util.*;
 public class ClaimManager {
     public static ClaimManager INSTANCE = null;
     public static MinecraftServer server;
+    public static final UUID defaultUUID = new UUID(0,0);
     public Map<PlayerEntity, Pair<BlockPos, BlockPos>> stickPositions = new HashMap<>();
     public List<UUID> ignoringClaims = new ArrayList<>();
     public List<UUID> flyers = new ArrayList<>();
@@ -51,11 +52,6 @@ public class ClaimManager {
 
     public void setClaimBlocks(Collection<ServerPlayerEntity> players, int amount) {
         players.forEach(player -> setClaimBlocks(player.getGameProfile().getId(), amount));
-    }
-
-    @Deprecated
-    public Claim getClaim(String name) {
-        return claimList.get(name);
     }
 
     public Claim getClaim(UUID uuid, String name) {
@@ -93,7 +89,7 @@ public class ClaimManager {
 
     public boolean wouldIntersect(Claim claim) {
         for (Claim value : claimList.get()) {
-            if (!value.isChild && !claim.name.equals(value.name) && (claim.intersects(value) || value.intersects(claim)))
+            if (!value.isChild && !claim.equals(value) && (claim.intersects(value) || value.intersects(claim)))
                 return true;
         }
         return false;
@@ -101,7 +97,7 @@ public class ClaimManager {
 
     public boolean wouldSubzoneIntersect(Claim claim) {
         for (Claim value : claimList.get()) {
-            if (!claim.name.equals(value.name) && claim.intersects(value, true)) {
+            if (!claim.equals(value) && claim.intersects(value, true)) {
                 return true;
             }
         }

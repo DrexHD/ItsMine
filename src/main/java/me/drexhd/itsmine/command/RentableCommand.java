@@ -61,7 +61,7 @@ public class RentableCommand {
         int configMax = ItsMineConfig.main().rent().maxRentTime;
         max = Math.min(max, configMax);
         ItemStack revenue = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "count"), false);
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         if(claim.rentManager.isTimeValid(min, max)) {
             claim.rentManager.makeRentable(revenue, min, max);
@@ -93,7 +93,7 @@ public class RentableCommand {
     }*/
 
     private static int toggle(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         if(claim.rentManager.isReady()) {
             String state = claim.rentManager.toggle() ? "&aenabled" : "&cdisabled";

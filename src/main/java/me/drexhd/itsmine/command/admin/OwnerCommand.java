@@ -43,7 +43,7 @@ public class OwnerCommand {
             });
 
             claimArgument.executes((context) -> {
-                Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+                Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
                 if (claim == null) {
                     context.getSource().sendError(Messages.INVALID_CLAIM);
                     return -1;
@@ -78,7 +78,7 @@ public class OwnerCommand {
             });
 
             claimArgument.executes((context) -> {
-                Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+                Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
                 if (claim == null) {
                     context.getSource().sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
                     return -1;

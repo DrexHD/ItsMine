@@ -4,9 +4,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.ClaimManager;
-import me.drexhd.itsmine.Messages;
+import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
 import me.drexhd.itsmine.util.ClaimUtil;
 import net.minecraft.server.command.ServerCommandSource;
@@ -37,12 +36,9 @@ public class RenameCommand {
             context.getSource().sendError(new LiteralText("Invalid claim name"));
             return -1;
         }
-        Claim claim = ClaimManager.INSTANCE.getClaim(name);
-        if (claim == null) {
-            context.getSource().sendError(Messages.INVALID_CLAIM);
-            return -1;
-        }
-        if (ClaimManager.INSTANCE.getClaim(newName) != null) {
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), name);
+        ClaimUtil.validateClaim(claim);
+        if (ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), newName) != null) {
             context.getSource().sendError(new LiteralText("That name is already taken!"));
             return -1;
         }
@@ -52,7 +48,7 @@ public class RenameCommand {
         }
         if(claim.isChild) claim.name = ClaimUtil.getParentClaim(claim).name + "." + newName;
         else claim.name = newName;
-        ClaimManager.INSTANCE.updateClaim(claim);
+//        ClaimManager.INSTANCE.updateClaim(claim);
         context.getSource().sendFeedback(new LiteralText("Renamed Claim " + name + " to " + claim.name).formatted(Formatting.GOLD), admin);
         return -1;
     }

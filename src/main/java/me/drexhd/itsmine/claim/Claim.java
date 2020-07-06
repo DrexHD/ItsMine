@@ -6,6 +6,7 @@ import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.MonitorableWorld;
 import me.drexhd.itsmine.claim.flag.FlagManager;
 import me.drexhd.itsmine.claim.permission.PermissionManager;
+import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +36,7 @@ public class Claim {
     public FlagManager flagManager = new FlagManager();
     public PermissionManager permissionManager = new PermissionManager();
     public RentManager rentManager = new RentManager();
-    public UUID claimBlockOwner = new UUID(0,0);
+    public UUID claimBlockOwner = new UUID(0, 0);
     public String customOwnerName, enterMessage, leaveMessage;
     public boolean isChild = false;
 
@@ -75,6 +76,17 @@ public class Claim {
                 g = new BlockPos(max.getX(), min.getY(), max.getZ()),
                 h = new BlockPos(min.getX(), max.getY(), max.getZ());
         return claim.includesPosition(a) && claim.includesPosition(b) && claim.includesPosition(c) && claim.includesPosition(d) && claim.includesPosition(e) && claim.includesPosition(f) && claim.includesPosition(g) && claim.includesPosition(h);
+    }
+
+    public String getName() {
+        String name;
+        if (isChild) {
+            String pName = ClaimUtil.getParentClaim(this).name;
+            name = pName + "." + this.name;
+        } else {
+            name = this.name;
+        }
+        return name;
     }
 
     public boolean intersects(Claim claim) {
@@ -120,31 +132,38 @@ public class Claim {
         }
     }
 
+    /**
+     * This method checks whether or not a player is allowed to perform the action linked to the passed permission node
+     *
+     * @param player the uuid of the player, who's permission you want to check
+     * @param parent the permission node (eg: break)
+     * @return true if the player has the permission, false if the doesn't
+     */
     public boolean hasPermission(UUID player, String parent) {
-        MessageUtil.debug("Checking permission ("+ player + ", " + parent  + ")");
-        if(player == null) return false;
+        MessageUtil.debug("Checking permission (" + player + ", " + parent + ")");
+        if (player == null) return false;
         if (parent.matches("[a-z_]+[.][\\w_]+")) {
             return hasPermission(player, parent.split("[.]")[0], parent.split("[.]")[1]);
         }
         UUID tenant = this.rentManager.getTenant();
         /*Check whether or not the player is a claim tenant and return true unless it's a modify permission*/
-        if(tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")){
+        if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
             return true;
         }
         /*claimBlockOwner might be null*/
-        if(claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
+        if (claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
         return ClaimManager.INSTANCE.ignoringClaims.contains(player) ||
                 permissionManager.hasPermission(player, parent);
     }
 
     public boolean hasPermission(UUID player, String parent, String child) {
-        MessageUtil.debug("Checking permission ("+ player + ", " + parent + ", " + child + ")");
-        if(player == null) return false;
+        System.out.println("Checking permission (" + player + ", " + parent + ", " + child + ")");
+        if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
-        if(tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")){
+        if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
             return true;
         }
-        if(claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
+        if (claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
         return ClaimManager.INSTANCE.ignoringClaims.contains(player) ||
                 permissionManager.hasPermission(player, parent) ||
                 permissionManager.hasPermission(player, parent, child);
@@ -310,7 +329,7 @@ public class Claim {
         }
         {
             CompoundTag rent = tag.getCompound("rent");
-            if(!rent.isEmpty()) {
+            if (!rent.isEmpty()) {
                 rentManager = new RentManager();
                 rentManager.fromTag(rent);
             }
@@ -361,7 +380,6 @@ public class Claim {
     public boolean is2d() {
         return min.getY() == 0 && max.getY() == 255;
     }
-
 
 
     public enum Event {

@@ -36,7 +36,7 @@ public class TrustedCommand {
         });
 
         claimArgument.executes((context) -> {
-            Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+            Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
             if (claim == null) {
                 context.getSource().sendError(Messages.INVALID_CLAIM);
                 return -1;

@@ -27,8 +27,8 @@ public class ShowCommand {
             LiteralArgumentBuilder<ServerCommandSource> show = literal("show");
             show.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension()), false));
             RequiredArgumentBuilder<ServerCommandSource, String> claim = ArgumentUtil.getClaims();
-            claim.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), false));
-            mode.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), false, StringArgumentType.getString(context, "mode")));
+            claim.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), false));
+            mode.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), false, StringArgumentType.getString(context, "mode")));
             claim.then(mode);
             show.then(claim);
             command.then(show);
@@ -37,7 +37,7 @@ public class ShowCommand {
             LiteralArgumentBuilder<ServerCommandSource> hide = literal("hide");
             hide.executes(context -> executeShowClaim(context.getSource(), null, true));
             RequiredArgumentBuilder<ServerCommandSource, String> claim = ArgumentUtil.getClaims();
-            claim.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), true));
+            claim.executes(context -> executeShowClaim(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), true));
             hide.then(claim);
             command.then(hide);
         }

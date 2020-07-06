@@ -26,38 +26,35 @@ public class RemoveCommand {
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
         LiteralArgumentBuilder<ServerCommandSource> delete = literal("remove");
         LiteralArgumentBuilder<ServerCommandSource> confirm = literal("confirm");
-        confirm.executes(context -> delete(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), admin));
+        confirm.executes(context -> delete(context, admin));
         claim.executes(context -> requestDelete(context, admin));
         claim.then(confirm);
         delete.then(claim);
         command.then(delete);
     }
 
-    public static int requestDelete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        ServerCommandSource sender = context.getSource();
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+    private static int requestDelete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
-        if (claim.claimBlockOwner != null && !claim.claimBlockOwner.equals(sender.getPlayer().getUuid())) {
-            if (admin && ItsMine.permissions().hasPermission(sender, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
-                sender.sendFeedback(new LiteralText("WARNING: This is not your claim...").formatted(Formatting.DARK_RED).formatted(Formatting.BOLD), false);
+        if (claim.claimBlockOwner != null && !claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {
+            if (admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
+                source.sendFeedback(new LiteralText("WARNING: This is not your claim...").formatted(Formatting.DARK_RED).formatted(Formatting.BOLD), false);
             } else {
-                sender.sendFeedback(new LiteralText("You cannot delete that claim").formatted(Formatting.RED), false);
+                source.sendFeedback(new LiteralText("You cannot delete that claim").formatted(Formatting.RED), false);
                 return 0;
             }
         }
-        sender.sendFeedback(new LiteralText("").append(new LiteralText("Are you sure you want to delete the claim \"" + claim.name + "\"? ").formatted(Formatting.GOLD))
-                .append(new LiteralText("[I'M SURE]").styled(style -> {
-                    return style.withColor(Formatting.DARK_RED).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (admin ? "/claim admin" : "/claim") + " remove " + claim.name + " confirm"));
-                })), false);
+        source.sendFeedback(new LiteralText("").append(new LiteralText("Are you sure you want to delete the claim \"" + claim.name + "\"? ").formatted(Formatting.GOLD))
+                .append(new LiteralText("[I'M SURE]").styled(style -> style.withColor(Formatting.DARK_RED).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (admin ? "/claim admin" : "/claim") + " remove " + claim.name + " confirm")))), false);
         return 0;
     }
 
-    public static int delete(ServerCommandSource source, Claim claim, boolean admin) throws CommandSyntaxException {
+    private static int delete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        Claim claim = ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), getString(context, "claim"));
         ServerWorld world = source.getWorld();
-        if (claim == null) {
-            source.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
+        ClaimUtil.validateClaim(claim);
         if (!claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {
             if (admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
                 source.sendFeedback(new LiteralText("Deleting a claim belonging to somebody else").formatted(Formatting.DARK_RED).formatted(Formatting.BOLD), false);
@@ -85,7 +82,7 @@ public class RemoveCommand {
                 silentHideShow(playerEntity, claim, true, true, ((ClaimShower) playerEntity).getMode());
         });
 
-        source.sendFeedback(new LiteralText("Deleted the claim \"" + claim.name + "\"").formatted(Formatting.GREEN), !claim.permissionManager.hasPermission(source.getPlayer().getGameProfile().getId(), "remove_claim"));
+        source.sendFeedback(new LiteralText("Deleted the claim \"" + claim.name + "\"").formatted(Formatting.GREEN), false);
         return 0;
     }
 }

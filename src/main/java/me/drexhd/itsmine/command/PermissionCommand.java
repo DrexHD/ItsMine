@@ -42,7 +42,7 @@ public class PermissionCommand {
         permissions.executes((context) -> HelpCommand.sendPage(context.getSource(), Messages.SETTINGS_AND_PERMISSIONS, 1, "Claim Permissions and Flags", "/claim help perms_and_flags %page%"));
 
         claim.executes((context) -> {
-            Claim claim1 = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+            Claim claim1 = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
             validateClaim(claim1);
             return TrustedCommand.showTrustedList(context, claim1, false);
         });
@@ -63,7 +63,7 @@ public class PermissionCommand {
     private static int set(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
         String claimName = getString(context, "claim");
         ServerPlayerEntity player = context.getSource().getPlayer();
-        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(claimName);
+        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         boolean permission = BoolArgumentType.getBool(context, "set");
         String input = StringArgumentType.getString(context, "permission");
@@ -78,7 +78,7 @@ public class PermissionCommand {
     }
 
     private static int reset(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         String input = StringArgumentType.getString(context, "permission");
         ServerCommandSource source = context.getSource();
@@ -90,7 +90,7 @@ public class PermissionCommand {
     }
 
     private static int queryPermission(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         String input = StringArgumentType.getString(context, "permission");
@@ -111,7 +111,7 @@ public class PermissionCommand {
     }
 
     private static int queryPermissions(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         UUID uuid = context.getSource().getPlayer().getUuid();
         if (claim.canModifySettings(uuid) || admin) {

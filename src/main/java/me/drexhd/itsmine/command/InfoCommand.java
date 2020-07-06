@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.TimeUtil;
 import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.server.command.ServerCommandSource;
@@ -24,18 +25,13 @@ public class InfoCommand {
                 context.getSource(),
                 ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension())
         ));
-        claim.executes(context -> info(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim"))
-        ));
+        claim.executes(context -> info(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"))));
         info.then(claim);
         command.then(info);
     }
 
     private static int info(ServerCommandSource source, Claim claim) throws CommandSyntaxException {
-        if (claim == null) {
-            source.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
-
+        ClaimUtil.validateClaim(claim);
         GameProfile owner = claim.claimBlockOwner == null ? null : source.getMinecraftServer().getUserCache().getByUuid(claim.claimBlockOwner);
         BlockPos size = claim.getSize();
 

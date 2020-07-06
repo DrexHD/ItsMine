@@ -60,7 +60,7 @@ public class TrustCommand {
             return 0;
         }
         ServerPlayerEntity p = context.getSource().getPlayer();
-        Claim claim = claimName == null ? ClaimManager.INSTANCE.getClaimAt(p.getBlockPos(), p.world.getDimension()) : ClaimManager.INSTANCE.getClaim(claimName);
+        Claim claim = claimName == null ? ClaimManager.INSTANCE.getClaimAt(p.getBlockPos(), p.world.getDimension()) : ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
         validateClaim(claim);
         targetCollection.iterator().forEachRemaining(gameProfile -> {
             try {

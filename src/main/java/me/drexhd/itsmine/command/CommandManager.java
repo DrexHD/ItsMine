@@ -2,7 +2,6 @@ package me.drexhd.itsmine.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import me.drexhd.itsmine.command.admin.AdminCommand;
 import me.drexhd.itsmine.command.subzone.SubzoneCommand;
 import net.minecraft.server.command.ServerCommandSource;
@@ -53,33 +52,6 @@ public class CommandManager {
         TransferCommand.register(command);
         TrustCommand.register(command, dispatcher, getClaims(), false);
         TrustedCommand.register(command);
-    }
-
-    private static int generateCommands(CommandContext<ServerCommandSource> context) {
-/*        Scoreboard scoreboard = context.getSource().getMinecraftServer().getScoreboard();
-        ItsMine.scoreboard = scoreboard;
-        ItsMine.convert = scoreboard.getKnownPlayers();
-        ItsMine.source = context.getSource();*/
-/*        Scoreboard scoreboard = context.getSource().getMinecraftServer().getScoreboard();
-        ItsMine.convert = scoreboard.getKnownPlayers();
-        System.out.println("running");
-        int size = scoreboard.getKnownPlayers().size();
-        int i = 0;
-        for(String player : scoreboard.getKnownPlayers()) {
-            ScoreboardObjective minutes = scoreboard.getObjective("minutes");
-            ScoreboardObjective votes = scoreboard.getObjective("totalVotes");
-            int min = scoreboard.getPlayerScore(player, minutes).getScore();
-            int vote = scoreboard.getPlayerScore(player, votes).getScore();
-            if(min >= 300 && vote >= 6) run(context.getSource(), player, "player");
-            if(min >= 1500 && vote >= 24) run(context.getSource(), player, "player_plus");
-            if(min >= 5000 && vote >= 48) run(context.getSource(), player, "member");
-            if(min >= 10000 && vote >= 72) run(context.getSource(), player, "kilocrafter");
-            if(min >= 30000 && vote >= 150) run(context.getSource(), player, "kilocrafter_plus");
-            i++;
-            System.out.println(i + " / " + size);
-        }
-        return 1;*/
-        return 1;
     }
 
 }

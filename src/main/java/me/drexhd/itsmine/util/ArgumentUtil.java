@@ -80,10 +80,12 @@ public class ArgumentUtil {
         ServerPlayerEntity player = context.getSource().getPlayer();
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null) names.add(current.name);
+        if (current != null) {
+            names.add(current.getName());
+        }
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
             if (claim != null) {
-                names.add(claim.name);
+                names.add(claim.getName());
             }
         }
         return CommandSource.suggestMatching(names, builder);
@@ -93,10 +95,10 @@ public class ArgumentUtil {
         ServerPlayerEntity player = context.getSource().getPlayer();
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null/* && !current.isChild*/) names.add(current.name);
+        if (current != null/* && !current.isChild*/) names.add(current.getName());
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
             if (claim != null && !claim.isChild) {
-                names.add(claim.name);
+                names.add(claim.getName());
             }
         }
         return CommandSource.suggestMatching(names, builder);
@@ -106,10 +108,10 @@ public class ArgumentUtil {
         ServerPlayerEntity player = context.getSource().getPlayer();
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null/* && current.isChild*/) names.add(current.name);
+        if (current != null/* && current.isChild*/) names.add(current.getName());
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
             if (claim != null && claim.isChild) {
-                names.add(claim.name);
+                names.add(claim.getName());
             }
         }
         return CommandSource.suggestMatching(names, builder);
@@ -207,7 +209,7 @@ public class ArgumentUtil {
         List<String> strings = new ArrayList<>();
         strings.add("reset");
         try {
-            Claim claim = ClaimManager.INSTANCE.getClaim(getString(source, "claim"));
+            Claim claim = ClaimManager.INSTANCE.getClaim(source.getSource().getPlayer().getUuid(), getString(source, "claim"));
             Claim.Event eventType = Claim.Event.getById(getString(source, "messageEvent"));
 
             if (eventType != null && claim != null) {

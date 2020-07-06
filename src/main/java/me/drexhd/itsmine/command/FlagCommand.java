@@ -3,6 +3,7 @@ package me.drexhd.itsmine.command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMineConfig;
@@ -33,11 +34,7 @@ public class FlagCommand {
         RequiredArgumentBuilder<ServerCommandSource, Boolean> set = argument("set", BoolArgumentType.bool());
         LiteralArgumentBuilder<ServerCommandSource> reset = literal("reset");
         flags.executes((context) -> HelpCommand.sendPage(context.getSource(), Messages.SETTINGS_AND_PERMISSIONS, 1, "Claim Permissions and Flags", "/claim help perms_and_flags %page%"));
-        claim.executes((context) -> {
-            Claim claim1 = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
-            validateClaim(claim1);
-            return queryFlags(context.getSource(), claim1);
-        });
+        claim.executes(FlagCommand::queryFlags);
 
         id.executes((context) -> executeFlag(context.getSource(), getString(context, "flag"), getString(context, "claim"), true, false, false, admin));
         set.executes((context) -> executeFlag(context.getSource(), getString(context, "flag"), getString(context, "claim"), false, BoolArgumentType.getBool(context, "set"), false, admin));
@@ -50,15 +47,16 @@ public class FlagCommand {
         command.then(flags);
     }
 
-    public static int queryFlags(ServerCommandSource source, Claim claim) {
-        source.sendFeedback(new LiteralText("\n").append(new LiteralText("Flags: " + claim.name).formatted(Formatting.YELLOW)).append(new LiteralText("\n"))
-                .append(Messages.Command.getFlags(claim)).append(new LiteralText("\n")), false);
+    public static int queryFlags(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
+        validateClaim(claim);
+        context.getSource().sendFeedback(new LiteralText("\n").append(new LiteralText("Flags: " + claim.name).formatted(Formatting.YELLOW)).append(new LiteralText("\n")).append(Messages.Command.getFlags(claim)).append(new LiteralText("\n")), false);
         return 1;
     }
 
     public static int executeFlag(ServerCommandSource source, String input, @Nullable String claimName, boolean isQuery, boolean value, boolean reset, boolean admin) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayer();
-        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(claimName);
+        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(player.getUuid(), claimName);
         validateClaim(claim);
         validateCanAccess(player, claim, admin);
         Flag flag = Flag.byID(input);

@@ -62,16 +62,16 @@ public class CreateCommand {
         command.then(create);
     }
 
-    public static int createClaim(String name, ServerCommandSource owner, BlockPos posA, BlockPos posB, boolean admin, @Nullable String cOwnerName) throws CommandSyntaxException {
+    public static int createClaim(String name, ServerCommandSource source, BlockPos posA, BlockPos posB, boolean admin, @Nullable String cOwnerName) throws CommandSyntaxException {
         if (name.length() > 30) {
-            owner.sendError(Messages.MSG_LONG_NAME);
+            source.sendError(Messages.MSG_LONG_NAME);
             return -1;
         }
         if(!name.matches("[A-Za-z0-9]+")){
-            owner.sendError(new LiteralText("Invalid claim name"));
+            source.sendError(new LiteralText("Invalid claim name"));
             return -1;
         }
-        UUID ownerID = owner.getPlayer().getGameProfile().getId();
+        UUID uuid = source.getPlayer().getUuid();
         int x, y = 0, z, mx, my = 255, mz;
         if (posA.getX() > posB.getX()) {
             x = posB.getX();
@@ -102,32 +102,32 @@ public class CreateCommand {
         sub = sub.add(1, ItsMineConfig.main().claims2d ? 0 : 1,1);
         int subInt = sub.getX() * (ItsMineConfig.main().claims2d ? 1 : sub.getY()) * sub.getZ();
 
-        Claim claim = new Claim(name, admin ? null : ownerID, min, max, owner.getWorld().getDimension(), owner.getPlayer().getBlockPos(), false);
+        Claim claim = new Claim(name, admin ? null : uuid, min, max, source.getWorld().getDimension(), source.getPlayer().getBlockPos(), false);
         if (cOwnerName != null) claim.customOwnerName = cOwnerName;
-        if ((ClaimManager.INSTANCE.getClaim(name) == null)) {
+        if ((ClaimManager.INSTANCE.getClaim(ClaimManager.defaultUUID, name) == null)) {
             if (!ClaimManager.INSTANCE.wouldIntersect(claim)) {
                 // works because only the first statement is evaluated if true
-                if ((admin && ItsMine.permissions().hasPermission(owner, PermissionUtil.Command.INFINITE_BLOCKS, 2)) || ClaimManager.INSTANCE.useClaimBlocks(ownerID, subInt)) {
+                if ((admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.INFINITE_BLOCKS, 2)) || ClaimManager.INSTANCE.useClaimBlocks(uuid, subInt)) {
                     ClaimManager.INSTANCE.addClaim(claim);
                     MutableText message = new LiteralText("");
                     message.append(new LiteralText("Your claim was created").formatted(Formatting.GREEN));
                     message.append(new LiteralText("(Area: " + sub.getX() + "x" + sub.getY() + "x" + sub.getZ() + ")").styled(style -> {
                         return style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(subInt + " blocks").formatted(Formatting.YELLOW)));
                     }));
-                    owner.sendFeedback(message, false);
-                    BlockCommand.blocksLeft(owner);
-                    executeShowClaim(owner, claim, false);
+                    source.sendFeedback(message, false);
+                    BlockCommand.blocksLeft(source);
+                    executeShowClaim(source, claim, false);
                     if (admin)
-                        owner.getMinecraftServer().sendSystemMessage(new LiteralText(owner.getPlayer().getGameProfile().getName() + " Has created a new claim(" + claim.name + ") using the admin command."), owner.getPlayer().getUuid());
+                        source.getMinecraftServer().sendSystemMessage(new LiteralText(source.getPlayer().getGameProfile().getName() + " Has created a new claim(" + claim.name + ") using the admin command."), source.getPlayer().getUuid());
                     return 1;
                 } else {
-                    owner.sendFeedback(new LiteralText("You don't have enough claim blocks. You have " + ClaimManager.INSTANCE.getClaimBlocks(ownerID) + ", you need " + subInt + "(" + (subInt - ClaimManager.INSTANCE.getClaimBlocks(ownerID)) + " more)").formatted(Formatting.RED), false);
+                    source.sendFeedback(new LiteralText("You don't have enough claim blocks. You have " + ClaimManager.INSTANCE.getClaimBlocks(uuid) + ", you need " + subInt + "(" + (subInt - ClaimManager.INSTANCE.getClaimBlocks(uuid)) + " more)").formatted(Formatting.RED), false);
                 }
             } else {
-                owner.sendFeedback(new LiteralText("Your claim would overlap with another claim").formatted(Formatting.RED), false);
+                source.sendFeedback(new LiteralText("Your claim would overlap with another claim").formatted(Formatting.RED), false);
             }
         } else {
-            owner.sendFeedback(new LiteralText("The name \"" + name + "\" is already taken.").formatted(Formatting.RED), false);
+            source.sendFeedback(new LiteralText("The name \"" + name + "\" is already taken.").formatted(Formatting.RED), false);
         }
         return 0;
     }
