@@ -94,6 +94,8 @@ public enum Permission {
                 if(!(item instanceof BlockItem)){
                     this.add(Registry.ITEM.getId(item).getPath());
                 }
+                this.add("FOODS");
+                this.add("BOATS");
             }
         }}),
         MODIFY(new ArrayList<String>(){{

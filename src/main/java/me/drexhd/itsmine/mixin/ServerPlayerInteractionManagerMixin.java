@@ -4,6 +4,7 @@ import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.BlockUtil;
+import me.drexhd.itsmine.util.ItemUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -13,10 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -36,33 +34,35 @@ import java.util.UUID;
  */
 @Mixin(ServerPlayerInteractionManager.class)
 public abstract class ServerPlayerInteractionManagerMixin {
-    @Shadow public ServerPlayerEntity player;
+    @Shadow
+    public ServerPlayerEntity player;
 
-    @Shadow public ServerWorld world;
+    @Shadow
+    public ServerWorld world;
 
     public BlockPos blockPos;
 
     /*This method injects at the beginning of the method to get the block position*/
     @Inject(method = "interactBlock", at = @At(value = "HEAD"))
-    private void getBlock(ServerPlayerEntity serverPlayerEntity, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir){
+    private void getBlock(ServerPlayerEntity serverPlayerEntity, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         blockPos = hitResult.getBlockPos().offset(hitResult.getSide());
     }
 
     /*Check whether or not the player can interact with the block he is clicking*/
     @Redirect(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onUse(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
-        private ActionResult interactIfPossible(BlockState blockState, World world, PlayerEntity player, Hand hand, BlockHitResult hit){
+    private ActionResult interactIfPossible(BlockState blockState, World world, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockPos pos = hit.getBlockPos();
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, player.world.getDimension());
         if (claim != null) {
             UUID uuid = player.getUuid();
             Block block = blockState.getBlock();
             if ((BlockUtil.isInteractAble(block)/*isBlockEntity(block) || BlockUtil.isShulkerBox(block) || BlockUtil.isButton(block) || BlockUtil.isTrapdoor(block) || BlockUtil.isDoor(block) || BlockUtil.isContainer(block)*/) && !(claim.hasPermission(uuid, "interact_block") ||
-                claim.hasPermission(uuid, "interact_block", Registry.BLOCK.getId(block).getPath()) ||
-                (BlockUtil.isButton(block) && claim.hasPermission(uuid, "interact_block", "BUTTONS")) ||
-                (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
-                (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
-                (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
-                (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) /*||
+                    claim.hasPermission(uuid, "interact_block", Registry.BLOCK.getId(block).getPath()) ||
+                    (BlockUtil.isButton(block) && claim.hasPermission(uuid, "interact_block", "BUTTONS")) ||
+                    (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
+                    (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
+                    (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
+                    (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) /*||
                 (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "shulker_box"))*/)) {
                 MessageUtil.sendTranslatableMessage(player, "messages", "interactBlock");
                 return ActionResult.FAIL;
@@ -71,15 +71,15 @@ public abstract class ServerPlayerInteractionManagerMixin {
         return blockState.onUse(world, player, hand, hit);
     }
 
-/*    Check whether or not the player is allowed to use the item in his hand
-    returning false means the interaction will pass*/
+    /*    Check whether or not the player is allowed to use the item in his hand
+        returning false means the interaction will pass*/
     @Redirect(method = "interactBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z", ordinal = 2))
     private boolean interactWithItemIfPossible(ItemStack stack) {
         Claim claim = ClaimManager.INSTANCE.getClaimAt(blockPos, world.getDimension());
         if (claim != null && !stack.isEmpty()) {
             Item item = stack.getItem();
             UUID uuid = player.getUuid();
-            if(item instanceof BlockItem || item instanceof BucketItem) {
+            if (item instanceof BlockItem || item instanceof BucketItem) {
                 if ((claim.hasPermission(uuid, "build")) || claim.hasPermission(uuid, "place", Registry.ITEM.getId(item).getPath())) {
                     return false;
                 } else {
@@ -87,7 +87,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
                     return true;
                 }
             } else {
-                if(claim.hasPermission(uuid, "use_item", Registry.ITEM.getId(item).getPath())) {
+                if (claim.hasPermission(uuid, "use_item", Registry.ITEM.getId(item).getPath())) {
                     return false;
                 } else {
                     MessageUtil.sendTranslatableMessage(player, "messages", "useItem");
@@ -120,15 +120,31 @@ public abstract class ServerPlayerInteractionManagerMixin {
             }
         }
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, player.world.getDimension());
-            String block = Registry.BLOCK.getId(player.getEntityWorld().getBlockState(pos).getBlock()).getPath();
-            if(claim != null){
-                if(claim.hasPermission(player.getUuid(), "build") || claim.hasPermission(player.getUuid(), "break", block)){
-                    return true;
-                } else {
-                    MessageUtil.sendTranslatableMessage(player, "messages", "breakBlock");
-                    return false;
-                }
+        String block = Registry.BLOCK.getId(player.getEntityWorld().getBlockState(pos).getBlock()).getPath();
+        if (claim != null) {
+            if (claim.hasPermission(player.getUuid(), "build") || claim.hasPermission(player.getUuid(), "break", block)) {
+                return true;
+            } else {
+                MessageUtil.sendTranslatableMessage(player, "messages", "breakBlock");
+                return false;
             }
+        }
         return world.canPlayerModifyAt(player, pos);
+    }
+
+    @Redirect(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;"))
+    private TypedActionResult<ItemStack> canUseItem(ItemStack itemStack, World world, PlayerEntity player, Hand hand) {
+        Claim claim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), world.getDimension());
+        Item item = itemStack.getItem();
+        if (claim != null) {
+            if (claim.hasPermission(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath()) ||
+                    (ItemUtil.isFood(item) && claim.hasPermission(player.getUuid(), "use_item", "FOODS")) ||
+                    (ItemUtil.isBoat(item) && claim.hasPermission(player.getUuid(), "use_item", "BOATS"))) {
+                return itemStack.use(world, player, hand);
+            } else {
+                return TypedActionResult.fail(itemStack);
+            }
+        }
+        return itemStack.use(world, player, hand);
     }
 }
