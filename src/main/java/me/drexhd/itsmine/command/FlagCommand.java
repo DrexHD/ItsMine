@@ -80,7 +80,7 @@ public class FlagCommand {
         boolean enabled = claim.flagManager.hasFlag(flag);
         MessageSection messageSection = ItsMineConfig.main().message();
         String value = enabled ? messageSection.getTrue() : messageSection.getFalse();
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag, "%value%", value), "messages", "flagQuery");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag, "%value%", value), ItsMineConfig.main().message().flagQuery);
         return 1;
     }
 
@@ -88,7 +88,7 @@ public class FlagCommand {
         boolean enabled = claim.permissionManager.defaults.hasPermission(permission);
         MessageSection messageSection = ItsMineConfig.main().message();
         String value = enabled ? messageSection.getTrue() : messageSection.getFalse();
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", permission, "%value%", value), "messages", "flagQuery");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", permission, "%value%", value), ItsMineConfig.main().message().flagQuery);
         return 1;
     }
 
@@ -96,7 +96,7 @@ public class FlagCommand {
         claim.flagManager.setFlag(flag, set);
         MessageSection messageSection = ItsMineConfig.main().message();
         String value = set ? messageSection.getTrue() : messageSection.getFalse();
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag, "%value%", value), "messages", "flagSet");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag, "%value%", value), ItsMineConfig.main().message().flagSet);
         return 0;
     }
 
@@ -104,19 +104,19 @@ public class FlagCommand {
         claim.permissionManager.defaults.setPermission(permission, set);
         MessageSection messageSection = ItsMineConfig.main().message();
         String value = set ? messageSection.getTrue() : messageSection.getFalse();
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", permission, "%value%", value), "messages", "defaultPermissionSet");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", permission, "%value%", value), ItsMineConfig.main().message().defaultPermissionSet);
         return 1;
     }
 
     private static int resetPermission(ServerCommandSource source, Claim claim, String permission) {
         claim.permissionManager.defaults.clearPermission(permission);
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", permission), "messages", "flagReset");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", permission), ItsMineConfig.main().message().flagReset);
         return 1;
     }
 
     private static int resetFlag(ServerCommandSource source, Claim claim, String flag) {
         claim.flagManager.clearFlag(flag);
-        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag), "messages", "flagReset");
+        MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%flag%", flag), ItsMineConfig.main().message().flagReset);
         return 1;
     }
 }

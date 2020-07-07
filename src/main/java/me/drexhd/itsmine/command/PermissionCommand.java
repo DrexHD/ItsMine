@@ -71,7 +71,7 @@ public class PermissionCommand {
         String value = permission ? messageSection.getTrue() : messageSection.getFalse();
         ServerCommandSource source = context.getSource();
         if (claim.canModifySettings(source.getPlayer().getUuid()) || admin) {
-            MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%value%", value, "%player%", gameProfile.getName()), "messages", "permissionSet");
+            MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%value%", value, "%player%", gameProfile.getName()), ItsMineConfig.main().message().permissionSet);
             claim.permissionManager.setPermission(gameProfile.getId(), input, permission);
         }
         return 0;
@@ -83,7 +83,7 @@ public class PermissionCommand {
         String input = StringArgumentType.getString(context, "permission");
         ServerCommandSource source = context.getSource();
         if (claim.canModifySettings(source.getPlayer().getUuid()) || admin) {
-            MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%player%", gameProfile.getName()), "messages", "permissionReset");
+            MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%player%", gameProfile.getName()), ItsMineConfig.main().message().permissionReset);
             claim.permissionManager.clearPermission(gameProfile.getId(), input);
         }
         return 0;
@@ -100,7 +100,7 @@ public class PermissionCommand {
         UUID uuid = context.getSource().getPlayer().getUuid();
         if (claim.canModifySettings(uuid) || admin) {
             if (Permission.isValid(input)) {
-                MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%value%", value, "%player%", gameProfile.getName()), "messages", "permissionQuery");
+                MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%value%", value, "%player%", gameProfile.getName()), ItsMineConfig.main().message().permissionQuery);
                 return 1;
             } else {
                 MessageUtil.sendTranslatableMessage(context.getSource(), "messages", "invalidPermission");
@@ -118,7 +118,7 @@ public class PermissionCommand {
             MessageUtil.sendText(context.getSource(), new LiteralText("Permissions (").formatted(Formatting.YELLOW).append(gameProfile.getName()).formatted(Formatting.GOLD).append(")").formatted(Formatting.YELLOW).append(Messages.Command.getPermissions(claim, gameProfile.getId())));
             return 1;
         } else {
-            MessageUtil.sendTranslatableMessage(context.getSource(), "messages", "invalidPermission");
+            MessageUtil.sendTranslatableMessage(context.getSource(), ItsMineConfig.main().message().invalidPermission);
             return 0;
         }
     }

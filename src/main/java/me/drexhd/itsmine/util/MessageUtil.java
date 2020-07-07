@@ -161,6 +161,10 @@ public class MessageUtil {
         sendMessage(source, getConfigString(var, path));
     }
 
+    public static void sendTranslatableMessage(ServerCommandSource source, Map<String, String> var, String string) {
+        sendMessage(source, getConfigString(var, string));
+    }
+
     @Deprecated
     public static void sendTranslatableMessageWithText(ServerCommandSource source, Map<String, Text> var, Object... path) {
         sendMessage(source, getConfigText(var, path));

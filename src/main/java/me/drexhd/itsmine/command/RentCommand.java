@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMine;
+import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.ItemUtil;
@@ -39,7 +40,7 @@ public class RentCommand {
         ServerCommandSource source = context.getSource();
         UUID uuid = source.getPlayer().getUuid();
         if(!claim.rentManager.isRentable()) {
-            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name),"messages", "notForRent");
+            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name), ItsMineConfig.main().message().notForRent);
             return 0;
         }
         if (claim.rentManager.isRented()) {
@@ -56,10 +57,10 @@ public class RentCommand {
                     if (claim.rentManager.hasEnough(hand, rent)) {
                         hand.setCount(claim.rentManager.removeItemStack(hand, rent).getCount());
                         int amount = claim.rentManager.extend(rent);
-                        MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(rent), "%amount%", String.valueOf(amount), "%item%", ItemUtil.toName(claim.rentManager.getCurrency(), amount)), "messages", "extendRent");
+                        MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(rent), "%amount%", String.valueOf(amount), "%item%", ItemUtil.toName(claim.rentManager.getCurrency(), amount)), ItsMineConfig.main().message().extendRent);
                         return 1;
                     } else {
-                        MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(claim.rentManager.getCurrency(), 2)), "messages", "notEnough");
+                        MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(claim.rentManager.getCurrency(), 2)), ItsMineConfig.main().message().notEnough);
                         return 0;
                     }
                 }
@@ -80,10 +81,10 @@ public class RentCommand {
                 if (claim.rentManager.hasEnough(hand, rent)) {
                     hand.setCount(claim.rentManager.removeItemStack(hand, rent).getCount());
                     int amount = claim.rentManager.rent(uuid, rent);
-                    MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(rent), "%amount%", String.valueOf(amount), "%item%", ItemUtil.toName(claim.rentManager.getCurrency(), amount)), "messages", "rent");
+                    MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(rent), "%amount%", String.valueOf(amount), "%item%", ItemUtil.toName(claim.rentManager.getCurrency(), amount)), ItsMineConfig.main().message().rent);
                     return 1;
                 } else {
-                    MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(claim.rentManager.getCurrency(), 2)), "messages", "notEnough");
+                    MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(claim.rentManager.getCurrency(), 2)), ItsMineConfig.main().message().notEnough);
                     return 0;
                 }
             }

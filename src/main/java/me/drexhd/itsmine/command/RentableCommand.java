@@ -65,7 +65,7 @@ public class RentableCommand {
         ClaimUtil.validateClaim(claim);
         if(claim.rentManager.isTimeValid(min, max)) {
             claim.rentManager.makeRentable(revenue, min, max);
-            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(revenue, revenue.getCount()),"%amount%", String.valueOf(revenue.getCount()), "%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(min)), "messages", "makeRentable");
+            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%item%", ItemUtil.toName(revenue, revenue.getCount()),"%amount%", String.valueOf(revenue.getCount()), "%claim%", claim.name, "%time%", TimeUtil.convertSecondsToString(min)), ItsMineConfig.main().message().makeRentable);
             return 1;
         } else {
             MessageUtil.sendTranslatableMessage(context.getSource(), "messages", "invalidRentTime");
@@ -97,10 +97,10 @@ public class RentableCommand {
         ClaimUtil.validateClaim(claim);
         if(claim.rentManager.isReady()) {
             String state = claim.rentManager.toggle() ? "&aenabled" : "&cdisabled";
-            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%value%", state, "%claim%", claim.name), "messages", "toggleRent");
+            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%value%", state, "%claim%", claim.name), ItsMineConfig.main().message().toggleRent);
             return 1;
         } else {
-            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name), "messages", "toggleRentError");
+            MessageUtil.sendTranslatableMessage(context.getSource(), MessageUtil.createMap("%claim%", claim.name), ItsMineConfig.main().message().toggleRentError);
             return 0;
         }
     }
