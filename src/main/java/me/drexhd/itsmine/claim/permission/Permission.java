@@ -15,7 +15,6 @@ public enum Permission {
     BREAK("break", PermissionGroup.BLOCK),
     MODIFY("modify", PermissionGroup.MODIFY),
     INTERACT_BLOCK("interact_block", PermissionGroup.BLOCK_ENTITY),
-//    CONTAINER("container", PermissionGroup.CONTAINER),
     BUILD("build"),
     FLIGHT("flight"),
     INTERACT_ENTITY("interact_entity", PermissionGroup.ENTITY),

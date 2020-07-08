@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.drexhd.itsmine.ClaimManager;
+import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
@@ -77,14 +78,13 @@ public class ArgumentUtil {
 
 
     private static CompletableFuture<Suggestions> claimSubzoneProvider(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        GameProfile gameProfile = ClaimManager.INSTANCE.getGameProfile(context);
         ServerPlayerEntity player = context.getSource().getPlayer();
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null) {
-            names.add(current.getName());
-        }
-        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
-            if (claim != null) {
+        if (current != null) names.add(current.getName());
+        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
+            if (claim != null && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")) ) {
                 names.add(claim.getName());
             }
         }
@@ -92,12 +92,17 @@ public class ArgumentUtil {
     };
 
     private static CompletableFuture<Suggestions> claimProvider(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        GameProfile gameProfile = ClaimManager.INSTANCE.getGameProfile(context);
+        System.out.println("gameProfile " + gameProfile.getName() + " " + gameProfile.getId());
         ServerPlayerEntity player = context.getSource().getPlayer();
+        System.out.println("player " + player.getName() + " " + player.getUuid());
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null/* && !current.isChild*/) names.add(current.getName());
-        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
-            if (claim != null && !claim.isChild) {
+        if (current != null) names.add(current.getName());
+        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
+            System.out.println("Claim " + claim.name);
+            if (claim != null && !claim.isChild/* && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin"))*/) {
+                System.out.println("added claim " + claim.name);
                 names.add(claim.getName());
             }
         }
@@ -105,12 +110,13 @@ public class ArgumentUtil {
     }
 
     private static CompletableFuture<Suggestions> subzoneProvider(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+        GameProfile gameProfile = ClaimManager.INSTANCE.getGameProfile(context);
         ServerPlayerEntity player = context.getSource().getPlayer();
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-        if (current != null/* && current.isChild*/) names.add(current.getName());
-        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(player.getGameProfile().getId())) {
-            if (claim != null && claim.isChild) {
+        if (current != null) names.add(current.getName());
+        for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
+            if (claim != null && claim.isChild && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")) ) {
                 names.add(claim.getName());
             }
         }
@@ -153,14 +159,14 @@ public class ArgumentUtil {
     };
 
     public static GameProfile getGameProfile(Collection<GameProfile> profiles, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        GameProfile gameProfile = null;
+        GameProfile gameProfile;
         if (profiles.size() > 1) {
             throw new SimpleCommandExceptionType(Messages.TOO_MANY_SELECTIONS).create();
         } else if(profiles.isEmpty()){
             throw new SimpleCommandExceptionType(Messages.TOO_FEW_SELECTIONS).create();
         }
         gameProfile = profiles.iterator().next();
-        if (context.getSource().getMinecraftServer().getUserCache().getByUuid(gameProfile.getId()).equals(gameProfile)) {
+        if (context.getSource().getMinecraftServer().getUserCache().getByUuid(gameProfile.getId()) != null) {
             return gameProfile;
         }
         return null;
@@ -227,7 +233,6 @@ public class ArgumentUtil {
         List<String> strings = new ArrayList<>();
         strings.add("outline");
         strings.add("corner");
-//        strings.add("old");
         return CommandSource.suggestMatching(strings, builder);
     };
 

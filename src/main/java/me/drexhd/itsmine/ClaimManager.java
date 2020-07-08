@@ -1,10 +1,16 @@
 package me.drexhd.itsmine;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.util.ArgumentUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -58,6 +64,19 @@ public class ClaimManager {
         return claimList.get(uuid, name);
     }
 
+    public Claim getClaim(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+        return claimList.get(getGameProfile(context).getId(), name);
+    }
+
+    public GameProfile getGameProfile(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        try {
+            return ArgumentUtil.getGameProfile(GameProfileArgumentType.getProfileArgument(context, "claimOwner"), context);
+        } catch (IllegalArgumentException e) {
+            ServerCommandSource source = context.getSource();
+            return source.getMinecraftServer().getUserCache().getByUuid(source.getPlayer().getUuid());
+        }
+    }
+
     public List<Claim> getPlayerClaims(UUID id) {
         return claimList.get(id) == null ? new ArrayList<>() : claimList.get(id);
     }
@@ -81,6 +100,10 @@ public class ClaimManager {
 
     public void releaseBlocksToOwner(Claim claim) {
         if (claim.claimBlockOwner != null) addClaimBlocks(claim.claimBlockOwner, claim.getArea());
+    }
+
+    public int getDataVersion() {
+        return this.dataVersion;
     }
 
     public boolean addClaim(Claim claim) {

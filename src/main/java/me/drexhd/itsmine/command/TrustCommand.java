@@ -7,18 +7,17 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
+import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.permission.map.InvertedMap;
+import me.drexhd.itsmine.util.ArgumentUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static me.drexhd.itsmine.util.ArgumentUtil.PLAYERS_PROVIDER;
@@ -30,53 +29,54 @@ public class TrustCommand {
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command, CommandDispatcher dispatcher, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
         {
             LiteralArgumentBuilder<ServerCommandSource> trust = literal("trust");
-            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> playerArgument = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
-            playerArgument.executes((context -> executeTrust(context, GameProfileArgumentType.getProfileArgument(context, "player"), true, null, admin)));
-            claim.executes((context -> executeTrust(context, GameProfileArgumentType.getProfileArgument(context, "player"), true, getString(context, "claim"), admin)));
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> player = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
 
-            playerArgument.then(claim);
-            trust.then(playerArgument);
+            player.executes((context -> executeTrust(context, true, "", admin)));
+            claim.executes((context -> executeTrust(context, true, getString(context, "claim"), admin)));
+
+            claimOwner.then(claim);
+            player.then(claim);
+            player.then(claimOwner);
+            trust.then(player);
             command.then(trust);
             dispatcher.register(trust);
         }
         {
             LiteralArgumentBuilder<ServerCommandSource> distrust = literal("distrust");
-            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> playerArgument = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> player = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
 
-            playerArgument.executes((context -> executeTrust(context, GameProfileArgumentType.getProfileArgument(context, "player"), false, null, admin)));
-            claim.executes((context -> executeTrust(context, GameProfileArgumentType.getProfileArgument(context, "player"), false, getString(context, "claim"), admin)));
+            player.executes((context -> executeTrust(context, false, "", admin)));
+            claim.executes((context -> executeTrust(context, false, getString(context, "claim"), admin)));
 
-            playerArgument.then(claim);
-            distrust.then(playerArgument);
+            claimOwner.then(claim);
+            player.then(claim);
+            player.then(claimOwner);
+            distrust.then(player);
             command.then(distrust);
             dispatcher.register(distrust);
         }
     }
-    private static int executeTrust(CommandContext<ServerCommandSource> context, Collection<GameProfile> targetCollection, boolean set, @Nullable String claimName, boolean admin) throws CommandSyntaxException {
-        AtomicInteger integer = new AtomicInteger();
 
-        if(targetCollection.isEmpty()){
-            context.getSource().sendFeedback(new LiteralText("No player provided").formatted(Formatting.RED), true);
+    private static int executeTrust(CommandContext<ServerCommandSource> context, boolean set, @Nullable String claimName, boolean admin) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        //Get and validate Claim
+        Claim claim;
+        if (claimName.equals("")) claim = ClaimManager.INSTANCE.getClaimAt(new BlockPos(source.getPosition()), source.getWorld().getDimension());
+        else claim = ClaimManager.INSTANCE.getClaim(context, claimName);
+        GameProfile gameProfile = ArgumentUtil.getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
+        validateClaim(claim);
+
+        //Get and validate GameProfile
+        if (gameProfile != null) {
+            return setTrust(context, claim, gameProfile, set, admin);
+        } else {
+            context.getSource().sendFeedback(new LiteralText("Unknown player!").formatted(Formatting.RED), false);
             return 0;
         }
-        ServerPlayerEntity p = context.getSource().getPlayer();
-        Claim claim = claimName == null ? ClaimManager.INSTANCE.getClaimAt(p.getBlockPos(), p.world.getDimension()) : ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
-        validateClaim(claim);
-        targetCollection.iterator().forEachRemaining(gameProfile -> {
-            try {
-                //This is supposed to check if the player has played before :shrug:
-                if(context.getSource().getMinecraftServer().getUserCache().getByUuid(gameProfile.getId()).equals(gameProfile)){
-                    integer.set(setTrust(context, claim, gameProfile, set, admin));
-                } else {
-                    context.getSource().sendFeedback(new LiteralText("Unknown player!").formatted(Formatting.RED), true);
-                    integer.set(0);
-                }
-            } catch (CommandSyntaxException e) {
-                e.printStackTrace();
-            }
-        });
-        return integer.get();
     }
+
     static int setTrust(CommandContext<ServerCommandSource> context, Claim claim, GameProfile target, boolean set, boolean admin) throws CommandSyntaxException {
         if (claim.canModifySettings(context.getSource().getPlayer().getUuid()) || admin) {
             if (set) {
@@ -86,7 +86,7 @@ public class TrustCommand {
             }
             context.getSource().sendFeedback(new LiteralText(target.getName() + (set ? " now" : " no longer") + " has all the permissions").formatted(Formatting.YELLOW), false);
         } else {
-            MessageUtil.sendTranslatableMessage(context.getSource(), "messages", "noPermission");
+            MessageUtil.sendTranslatableMessage(context.getSource(), ItsMineConfig.main().message().noPermission);
         }
         return 1;
     }

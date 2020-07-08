@@ -11,6 +11,7 @@ import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.PermissionUtil;
 import me.drexhd.itsmine.util.ShowerUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.ClickEvent;
@@ -19,6 +20,7 @@ import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static me.drexhd.itsmine.util.ShowerUtil.silentHideShow;
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class RemoveCommand {
@@ -26,16 +28,20 @@ public class RemoveCommand {
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
         LiteralArgumentBuilder<ServerCommandSource> delete = literal("remove");
         LiteralArgumentBuilder<ServerCommandSource> confirm = literal("confirm");
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+
         confirm.executes(context -> delete(context, admin));
         claim.executes(context -> requestDelete(context, admin));
         claim.then(confirm);
         delete.then(claim);
+        claimOwner.then(claim);
+        delete.then(claimOwner);
         command.then(delete);
     }
 
     private static int requestDelete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         if (claim.claimBlockOwner != null && !claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {
             if (admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
@@ -52,7 +58,7 @@ public class RemoveCommand {
 
     private static int delete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        Claim claim = ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
         ServerWorld world = source.getWorld();
         ClaimUtil.validateClaim(claim);
         if (!claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {

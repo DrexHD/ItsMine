@@ -12,12 +12,13 @@ import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.flag.Flag;
 import me.drexhd.itsmine.claim.permission.Permission;
 import me.drexhd.itsmine.config.sections.MessageSection;
+import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.MessageUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
-import org.jetbrains.annotations.Nullable;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static me.drexhd.itsmine.util.ArgumentUtil.getFlags;
@@ -33,31 +34,35 @@ public class FlagCommand {
         RequiredArgumentBuilder<ServerCommandSource, String> id = getFlags();
         RequiredArgumentBuilder<ServerCommandSource, Boolean> set = argument("set", BoolArgumentType.bool());
         LiteralArgumentBuilder<ServerCommandSource> reset = literal("reset");
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+
         flags.executes((context) -> HelpCommand.sendPage(context.getSource(), Messages.SETTINGS_AND_PERMISSIONS, 1, "Claim Permissions and Flags", "/claim help perms_and_flags %page%"));
         claim.executes(FlagCommand::queryFlags);
-
-        id.executes((context) -> executeFlag(context.getSource(), getString(context, "flag"), getString(context, "claim"), true, false, false, admin));
-        set.executes((context) -> executeFlag(context.getSource(), getString(context, "flag"), getString(context, "claim"), false, BoolArgumentType.getBool(context, "set"), false, admin));
-        reset.executes((context) -> executeFlag(context.getSource(), getString(context, "flag"), getString(context, "claim"), false, false, true, admin));
+        id.executes((context) -> executeFlag(context, getString(context, "flag"), true, false, false, admin));
+        set.executes((context) -> executeFlag(context, getString(context, "flag"), false, BoolArgumentType.getBool(context, "set"), false, admin));
+        reset.executes((context) -> executeFlag(context, getString(context, "flag"), false, false, true, admin));
 
         id.then(set);
         id.then(reset);
         claim.then(id);
+        claimOwner.then(claim);
+        flags.then(claimOwner);
         flags.then(claim);
         command.then(flags);
     }
 
     public static int queryFlags(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
         validateClaim(claim);
         context.getSource().sendFeedback(new LiteralText("\n").append(new LiteralText("Flags: " + claim.name).formatted(Formatting.YELLOW)).append(new LiteralText("\n")).append(Messages.Command.getFlags(claim)).append(new LiteralText("\n")), false);
         return 1;
     }
 
-    public static int executeFlag(ServerCommandSource source, String input, @Nullable String claimName, boolean isQuery, boolean value, boolean reset, boolean admin) throws CommandSyntaxException {
+    public static int executeFlag(CommandContext<ServerCommandSource> context, String input, boolean isQuery, boolean value, boolean reset, boolean admin) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
         ServerPlayerEntity player = source.getPlayer();
-        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(player.getUuid(), claimName);
-        validateClaim(claim);
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        ClaimUtil.validateClaim(claim);
         validateCanAccess(player, claim, admin);
         Flag flag = Flag.byID(input);
 
