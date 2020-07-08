@@ -15,7 +15,6 @@ public enum Permission {
     BREAK("break", PermissionGroup.BLOCK),
     MODIFY("modify", PermissionGroup.MODIFY),
     INTERACT_BLOCK("interact_block", PermissionGroup.BLOCK_ENTITY),
-//    CONTAINER("container", PermissionGroup.CONTAINER),
     BUILD("build"),
     FLIGHT("flight"),
     INTERACT_ENTITY("interact_entity", PermissionGroup.ENTITY),
@@ -94,6 +93,8 @@ public enum Permission {
                 if(!(item instanceof BlockItem)){
                     this.add(Registry.ITEM.getId(item).getPath());
                 }
+                this.add("FOODS");
+                this.add("BOATS");
             }
         }}),
         MODIFY(new ArrayList<String>(){{

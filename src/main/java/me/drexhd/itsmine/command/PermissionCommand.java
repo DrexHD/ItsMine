@@ -17,7 +17,6 @@ import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
@@ -37,33 +36,35 @@ public class PermissionCommand {
         RequiredArgumentBuilder<ServerCommandSource, String> permNode = getPermissions();
         RequiredArgumentBuilder<ServerCommandSource, Boolean> set = argument("set", BoolArgumentType.bool());
         LiteralArgumentBuilder<ServerCommandSource> reset = literal("reset");
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
 
 
         permissions.executes((context) -> HelpCommand.sendPage(context.getSource(), Messages.SETTINGS_AND_PERMISSIONS, 1, "Claim Permissions and Flags", "/claim help perms_and_flags %page%"));
-
-        claim.executes((context) -> {
-            Claim claim1 = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
-            validateClaim(claim1);
-            return TrustedCommand.showTrustedList(context, claim1, false);
-        });
-
+        claim.executes(PermissionCommand::queryTrusted);
         player.executes(context -> queryPermissions(context, admin));
-
         set.executes(context -> set(context, admin));
         reset.executes(context -> reset(context, admin));
         permNode.executes(context -> queryPermission(context, admin));
+
         permNode.then(set);
         permNode.then(reset);
         player.then(permNode);
         claim.then(player);
         permissions.then(claim);
+        claimOwner.then(claim);
+        permissions.then(claimOwner);
         command.then(permissions);
     }
 
+    private static int queryTrusted(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        validateClaim(claim);
+        return TrustedCommand.showTrustedList(context, claim, false);
+    }
+
     private static int set(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        String claimName = getString(context, "claim");
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        Claim claim = claimName == null || claimName.isEmpty() ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getEntityWorld().getDimension()) : ClaimManager.INSTANCE.getClaim(claimName);
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        ClaimUtil.validateClaim(claim);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         boolean permission = BoolArgumentType.getBool(context, "set");
         String input = StringArgumentType.getString(context, "permission");
@@ -78,7 +79,8 @@ public class PermissionCommand {
     }
 
     private static int reset(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        ClaimUtil.validateClaim(claim);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         String input = StringArgumentType.getString(context, "permission");
         ServerCommandSource source = context.getSource();
@@ -90,7 +92,7 @@ public class PermissionCommand {
     }
 
     private static int queryPermission(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         String input = StringArgumentType.getString(context, "permission");
@@ -111,7 +113,7 @@ public class PermissionCommand {
     }
 
     private static int queryPermissions(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         UUID uuid = context.getSource().getPlayer().getUuid();
         if (claim.canModifySettings(uuid) || admin) {

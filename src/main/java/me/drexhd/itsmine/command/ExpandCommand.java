@@ -146,9 +146,11 @@ public class ExpandCommand {
                 BlockCommand.blocksLeft(source);
                 undoExpand(claim, direction, amount);
                 ShowerUtil.update(claim, source.getWorld(), true);
+                ClaimManager.INSTANCE.updateClaim(claim);
                 if (amount > 0) claim.expand(direction, amount);
                 else claim.shrink(direction, -amount);
                 ShowerUtil.update(claim, source.getWorld(), false);
+                ClaimManager.INSTANCE.updateClaim(claim);
             }
             return 0;
         } else {
@@ -164,9 +166,11 @@ public class ExpandCommand {
                 //The expansion is undone to hide the claimshower
                 undoExpand(claim, direction, amount);
                 ShowerUtil.update(parent, source.getWorld(), true);
+                ClaimManager.INSTANCE.updateClaim(claim);
                 if (amount > 0) claim.expand(direction, amount);
                 else claim.shrink(direction, -amount);
                 ShowerUtil.update(parent, source.getWorld(), false);
+                ClaimManager.INSTANCE.updateClaim(claim);
             }
         }
         return 0;

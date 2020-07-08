@@ -10,6 +10,7 @@ import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
+import me.drexhd.itsmine.util.ClaimUtil;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -59,8 +60,8 @@ public class CreateCommand {
             return -1;
         }
 
-        if (ClaimManager.INSTANCE.getClaim(name) != null) {
-            source.sendFeedback(new LiteralText("The name \"" + name + "\" is already taken.").formatted(Formatting.RED), false);
+        if (ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), claim.name + "." + name) != null) {
+            source.sendFeedback(new LiteralText("The name \"" + claim.name + "." + name + "\" is already taken.").formatted(Formatting.RED), false);
             return -1;
         }
         Pair<BlockPos, BlockPos> selectedPositions = ClaimManager.INSTANCE.stickPositions.get(player);
@@ -71,7 +72,7 @@ public class CreateCommand {
         } else if (selectedPositions.getRight() == null) {
             source.sendFeedback(new LiteralText("You need to specify block positions or select position #2(Left Click) with a stick.").formatted(Formatting.RED), false);
         } else {
-            name = claim.name + "." + name;
+//            name = claim.name + "." + name;
             subZone = createSubzone(source, name, selectedPositions.getLeft(), selectedPositions.getRight(), admin);
             if (subZone.dimension == claim.dimension && claim.includesPosition(subZone.min) && claim.includesPosition(subZone.max) && !claim.isChild){
                 if (!ClaimManager.INSTANCE.wouldSubzoneIntersect((subZone))){
@@ -131,11 +132,10 @@ public class CreateCommand {
     private static Claim validateAndGet(ServerCommandSource source, @Nullable String  claimName, boolean admin) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayer();
         Claim claim = claimName == null ? ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension()) :
-                ClaimManager.INSTANCE.getClaim(claimName);
+                ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), claimName);
 
-        if (claim == null) {
-            throw new SimpleCommandExceptionType(Messages.INVALID_CLAIM).create();
-        }
+        ClaimUtil.validateClaim(claim);
+
         if (!admin && !claim.hasPermission(player.getGameProfile().getId(), "modify", "subzone")) {
             throw new SimpleCommandExceptionType(Messages.NO_PERMISSION).create();
         }

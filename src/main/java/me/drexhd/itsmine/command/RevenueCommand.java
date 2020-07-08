@@ -33,8 +33,8 @@ public class RevenueCommand {
         RequiredArgumentBuilder<ServerCommandSource, Boolean> claimRevenue = argument("claimRevenue", BoolArgumentType.bool());
         revenue.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension()), false));
         revenue.requires(source -> ItsMine.permissions().hasPermission(source, "itsmine." + "rent", 2));
-        claim.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), false));
-        claimRevenue.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), true));
+        claim.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), false));
+        claimRevenue.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), true));
         claim.then(claimRevenue);
         revenue.then(claim);
         command.then(revenue);

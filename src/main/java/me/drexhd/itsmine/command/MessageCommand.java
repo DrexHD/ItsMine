@@ -20,7 +20,7 @@ public class MessageCommand {
         RequiredArgumentBuilder<ServerCommandSource, String> messageEvent = getMessageEvent();
         RequiredArgumentBuilder<ServerCommandSource, String> messageArgument = getEventMessage();
         messageArgument.executes(context -> {
-            Claim claim1 = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+            Claim claim1 = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
             if (claim1.canModifySettings(context.getSource().getPlayer().getUuid())) {
                 Claim.Event event = Claim.Event.getById(getString(context, "messageEvent"));
 

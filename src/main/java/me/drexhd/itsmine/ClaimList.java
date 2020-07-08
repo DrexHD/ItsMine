@@ -5,24 +5,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimList {
 
 
     private ArrayList<Claim> claims = new ArrayList<>();
-    private HashMap<String, Claim> claimsByName = new HashMap<>();
     private HashMap<UUID, ArrayList<Claim>> claimsByUUID = new HashMap<>();
 
 
     /*This map stores a list of claims sorted by chunkPos (the center chunk of each region), claims */
     private HashMap<Region, ArrayList<Claim>> claimsByRegion = new HashMap<>();
-
-/*    public ClaimList(ArrayList<Claim> claims) {
-        this.claims = claims;
-    }*/
 
     public ArrayList<Claim> get() {
         return claims;
@@ -32,7 +25,7 @@ public class ClaimList {
     public Claim get(int x, int y, int z, DimensionType dimension) {
         BlockPos pos = new BlockPos(x, y, z);
         ArrayList<Claim> claims = claimsByRegion.get(Region.get(x, z));
-        if(claims == null) return null;
+        if (claims == null) return null;
         for (Claim claim : claims) {
             if (claim.includesPosition(pos) && claim.dimension.equals(dimension)) {
                 for (Claim subzone : claim.subzones) {
@@ -47,8 +40,24 @@ public class ClaimList {
     }
 
     @Nullable
-    public Claim get(String name) {
-        return claimsByName.get(name);
+    public Claim get(UUID uuid, String name) {
+        ArrayList<Claim> claims = claimsByUUID.get(uuid);
+        for (Claim claim : claims) {
+            if (claim.getName().equals(name)) {
+                return claim;
+            }
+/*            if (claim.isChild) {
+                String subzoneName = ClaimUtil.getParentClaim(claim).name + "." + claim.name;
+                if (subzoneName.equals(name)) {
+                    return claim;
+                }
+            } else {
+                if (claim.name.equals(name)) {
+                    return claim;
+                }
+            }*/
+        }
+        return null;
     }
 
     @Nullable
@@ -56,7 +65,23 @@ public class ClaimList {
         return claimsByUUID.get(uuid);
     }
 
+    public Set<UUID> getplayers() {
+        return claimsByUUID.keySet();
+    }
+
+
     public void remove(Claim claim) {
+/*        HashMap<Region, ArrayList<Claim>> claimsByRegionCopy = (HashMap<Region, ArrayList<Claim>>) claimsByRegion.clone();
+        for (Map.Entry<Region, ArrayList<Claim>> entry : claimsByRegion.entrySet()) {
+            for (Claim claimEntry : entry.getValue()) {
+                if (claim.equals(claimEntry)) {
+                    ArrayList<Claim> claimList = entry.getValue();
+                    claimList.remove(claimEntry);
+                    claimsByRegionCopy.put(entry.getKey(), claimList);
+                }
+            }
+        }
+        claimsByRegion = claimsByRegionCopy;*/
         Region regionA = Region.get(claim.min.getX(), claim.min.getZ());
         Region regionB = Region.get(claim.min.getX(), claim.max.getZ());
         Region regionC = Region.get(claim.max.getX(), claim.min.getZ());
@@ -74,7 +99,6 @@ public class ClaimList {
         claimsByRegion.put(regionC, c);
         claimsByRegion.put(regionD, d);
         claims.remove(claim);
-        claimsByName.remove(claim.name);
         ArrayList<Claim> claims = claimsByUUID.get(claim.claimBlockOwner);
         claims.remove(claim);
         claimsByUUID.put(claim.claimBlockOwner, claims);
@@ -82,7 +106,7 @@ public class ClaimList {
 
     public boolean add(Claim claim) {
         /*Do not add if the claim already exists*/
-        if(claims.contains(claim)) return false;
+        if (claims.contains(claim)) return false;
 
         /*Find all corners of the claim, to save them at the proper location*/
         Region regionA = Region.get(claim.min.getX(), claim.min.getZ());
@@ -112,15 +136,14 @@ public class ClaimList {
 
         /*Add the claims to the remaining lists*/
         claims.add(claim);
-        claimsByName.put(claim.name, claim);
-        ArrayList<Claim> claims = claimsByUUID.get(claim.claimBlockOwner);
-        if (claims != null) {
-            claims.add(claim);
-            claimsByUUID.put(claim.claimBlockOwner, claims);
+        ArrayList<Claim> oldList = claimsByUUID.get(claim.claimBlockOwner);
+        if (oldList != null) {
+            oldList.add(claim);
+            claimsByUUID.put(claim.claimBlockOwner, oldList);
         } else {
-            ArrayList<Claim> claims1 = new ArrayList<>();
-            claims1.add(claim);
-            claimsByUUID.put(claim.claimBlockOwner, claims1);
+            ArrayList<Claim> newList = new ArrayList<>();
+            newList.add(claim);
+            claimsByUUID.put(claim.claimBlockOwner, newList);
         }
         return true;
     }

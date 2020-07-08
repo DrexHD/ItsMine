@@ -1,5 +1,6 @@
 package me.drexhd.itsmine.util;
 
+import net.minecraft.item.BoatItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.Registry;
@@ -13,8 +14,6 @@ public class ItemUtil {
     public static String toName(Item item) {
         return Registry.ITEM.getId(item).getPath();
     }
-
-
 
     public static String toName(ItemStack itemStack, int amount) {
         return toName(itemStack.getItem(), amount);
@@ -36,5 +35,10 @@ public class ItemUtil {
         /*handle grammar*/
         return amount > 1 ? string + "s" : string;
     }
+
+    public static boolean isFood(Item item) { return item.isFood(); }
+
+    public static boolean isBoat(Item item) { return item instanceof BoatItem; }
+
 
 }

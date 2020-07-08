@@ -5,19 +5,24 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.ClaimManager;
-import me.drexhd.itsmine.Messages;
+import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.permission.Permission;
 import me.drexhd.itsmine.util.ArgumentUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.*;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.builder.RequiredArgumentBuilder.argument;
+import static me.drexhd.itsmine.util.ClaimUtil.validateClaim;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TrustedCommand {
@@ -25,26 +30,24 @@ public class TrustedCommand {
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command) {
         LiteralArgumentBuilder<ServerCommandSource> trusted = literal("trusted");
         RequiredArgumentBuilder<ServerCommandSource, String> claimArgument = ArgumentUtil.getClaims();
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+
+        claimOwner.then(claimArgument);
+        trusted.then(claimOwner);
+        trusted.then(claimArgument);
+        command.then(trusted);
+
         trusted.executes((context)-> {
-            ServerPlayerEntity player = context.getSource().getPlayer();
-            Claim claim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
-            if (claim == null) {
-                context.getSource().sendError(Messages.INVALID_CLAIM);
-                return -1;
-            }
+            Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+            validateClaim(claim);
             return showTrustedList(context, claim, false);
         });
 
         claimArgument.executes((context) -> {
-            Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
-            if (claim == null) {
-                context.getSource().sendError(Messages.INVALID_CLAIM);
-                return -1;
-            }
+            Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+            validateClaim(claim);
             return showTrustedList(context, claim, false);
         });
-        trusted.then(claimArgument);
-        command.then(trusted);
     }
     
     static int showTrustedList(CommandContext<ServerCommandSource> context, Claim claim, boolean showSelf) throws CommandSyntaxException {

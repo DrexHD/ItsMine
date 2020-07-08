@@ -34,7 +34,7 @@ public class RentCommand {
     }
 
     private static int rent(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(getString(context, "claim"));
+        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
         ClaimUtil.validateClaim(claim);
         int rent = TimeUtil.convertStringtoSeconds(getString(context, "time"));
         ServerCommandSource source = context.getSource();

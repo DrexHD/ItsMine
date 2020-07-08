@@ -3,39 +3,42 @@ package me.drexhd.itsmine.command;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.TimeUtil;
 import me.drexhd.itsmine.util.WorldUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class InfoCommand {
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim) {
         LiteralArgumentBuilder<ServerCommandSource> info = literal("info");
-        info.executes(context -> info(
-                context.getSource(),
-                ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension())
-        ));
-        claim.executes(context -> info(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim"))
-        ));
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+        info.executes(context -> info(context, ""));
+        claim.executes(context -> info(context, getString(context, "claim")));
+        claimOwner.then(claim);
+        info.then(claimOwner);
         info.then(claim);
         command.then(info);
     }
 
-    private static int info(ServerCommandSource source, Claim claim) throws CommandSyntaxException {
-        if (claim == null) {
-            source.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
-
+    private static int info(CommandContext<ServerCommandSource> context, String claimName) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        Claim claim;
+        if (claimName.equals("")) claim = ClaimManager.INSTANCE.getClaimAt(new BlockPos(source.getPosition()), source.getWorld().getDimension());
+        else claim = ClaimManager.INSTANCE.getClaim(context, claimName);
+        ClaimUtil.validateClaim(claim);
         GameProfile owner = claim.claimBlockOwner == null ? null : source.getMinecraftServer().getUserCache().getByUuid(claim.claimBlockOwner);
         BlockPos size = claim.getSize();
 
@@ -63,13 +66,13 @@ public class InfoCommand {
                 .append(new LiteralText("Max ").formatted(Formatting.WHITE).append(max))));
         text.append(pos);
         text.append(newInfoLine("Dimension", new LiteralText(WorldUtil.getDimensionName(claim.dimension))));
-        if(claim.rentManager.isRented()){
+        if (claim.rentManager.isRented()) {
             GameProfile tenant = claim.rentManager.getTenant() == null ? null : source.getMinecraftServer().getUserCache().getByUuid(claim.rentManager.getTenant());
             text.append(newInfoLine("Status", new LiteralText("Rented").formatted(Formatting.RED).styled(style -> {
-                java.util.Date time=new java.util.Date((long) claim.rentManager.getUntil()*1000);
+                java.util.Date time = new java.util.Date((long) claim.rentManager.getUntil() * 1000);
                 return style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, newInfoLine("Until", new LiteralText(time.toString()).formatted(Formatting.WHITE)).append(newInfoLine("By", new LiteralText(tenant.getName()).formatted(Formatting.WHITE))).append(newInfoLine("Price", new LiteralText(claim.rentManager.getAmount() + " ").append(new TranslatableText(claim.rentManager.getCurrency().getTranslationKey()).append(new LiteralText(" every " + TimeUtil.convertSecondsToString(claim.rentManager.getMin())).formatted(Formatting.WHITE)))))));
             })));
-        } else if (claim.rentManager.isRentable() && !claim.rentManager.isRented()){
+        } else if (claim.rentManager.isRentable() && !claim.rentManager.isRented()) {
             text.append(newInfoLine("Status", new LiteralText("For Rent").formatted(Formatting.GREEN).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, newInfoLine("Price", new LiteralText(claim.rentManager.getAmount() + " "), new TranslatableText(claim.rentManager.getCurrency().getTranslationKey()).formatted(Formatting.WHITE), new LiteralText(" every " + TimeUtil.convertSecondsToString(claim.rentManager.getMin())).formatted(Formatting.WHITE)).append(newInfoLine("Max Rent", new LiteralText(TimeUtil.convertSecondsToString(claim.rentManager.getMax())).formatted(Formatting.WHITE))))))));
 
         } else {
@@ -87,9 +90,10 @@ public class InfoCommand {
                 .append(new LiteralText(" "))
                 .append(new LiteralText(String.valueOf(pos.getZ())).formatted(form1));
     }
+
     private static MutableText newInfoLine(String title, Text... text) {
         MutableText message = new LiteralText("").append(new LiteralText("* " + title + ": ").formatted(Formatting.YELLOW));
-        for(Text t : text) {
+        for (Text t : text) {
             message.append(t);
         }
         return message.append(new LiteralText("\n"));

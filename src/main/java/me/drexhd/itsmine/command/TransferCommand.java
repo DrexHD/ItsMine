@@ -39,7 +39,7 @@ public class TransferCommand {
         ServerPlayerEntity p = EntityArgumentType.getPlayer(context, "player");
         String input = getString(context, "claim");
         String claimName = input.replace(string, "");
-        Claim claim1 = ClaimManager.INSTANCE.getClaim(claimName);
+        Claim claim1 = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
         if (claim1 == null) {
             context.getSource().sendError(Messages.INVALID_CLAIM);
             return -1;
@@ -49,7 +49,7 @@ public class TransferCommand {
         }
         return transfer(context.getSource(), claim1, p, false);
     });
-            player.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaim(getString(context, "claim")), EntityArgumentType.getPlayer(context, "player"), false));
+            player.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), EntityArgumentType.getPlayer(context, "player"), false));
             player.then(confirm);
             claim.then(player);
             transfer.then(claim);
@@ -58,7 +58,7 @@ public class TransferCommand {
     }
 
     public static int acceptTransfer(ServerCommandSource sender) throws CommandSyntaxException {
-        Claim claim = ClaimManager.INSTANCE.getClaim(pendingClaimTransfers.get(sender.getPlayer().getGameProfile().getId()));
+        Claim claim = ClaimManager.INSTANCE.getClaim(sender.getPlayer().getUuid(), pendingClaimTransfers.get(sender.getPlayer().getGameProfile().getId()));
         if (claim == null) {
             sender.sendFeedback(new LiteralText("You have no pending claim transfers").formatted(Formatting.RED), false);
             return 0;

@@ -219,7 +219,7 @@ public class MessageUtil {
     }
 
     public static void debug(String debug) {
-        if(SharedConstants.isDevelopment) LOGGER.debug(debug);
+        if(SharedConstants.isDevelopment) System.out.println(debug);
     }
 
     public static void log(String log) {
