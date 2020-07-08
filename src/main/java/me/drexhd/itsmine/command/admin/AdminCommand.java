@@ -30,6 +30,7 @@ public class AdminCommand {
         EntitiesCommand.register(admin);
         ExpandCommand.register(admin);
         IgnoreCommand.register(admin);
+        InfoCommand.register(admin);
         ListAllCommand.register(admin);
         MessageCommand.register(admin, true, getClaims());
         OwnerCommand.register(admin);
