@@ -22,19 +22,17 @@ public class StickClaimItemMixin {
 //    private void setStickPositionFirst(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
     private void setStickPositionFirst(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
         PlayerEntity player = context.getPlayer();
-        if (!player.isSneaking()) {
-            if ((Object)this == Items.STICK) {
-                Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(context.getPlayer());
-                if (posPair == null) return;
-                else posPair = new Pair<>(context.getBlockPos(), posPair.getRight());
-                ClaimManager.INSTANCE.stickPositions.put(context.getPlayer(), posPair);
-                context.getPlayer().sendSystemMessage(new LiteralText("Position #2 set: " + context.getBlockPos().getX() + (ItsMineConfig.main().claims2d ? "" : " " + context.getBlockPos().getY()) + " " + context.getBlockPos().getZ()).formatted(Formatting.GREEN), player.getUuid());
-                if (posPair.getRight() != null) {
-                    player.sendSystemMessage(new LiteralText("Area Selected. Type /claim create <name> to create your claim!").formatted(Formatting.GOLD), player.getUuid());
-                    if (!ItsMineConfig.main().claims2d) player.sendSystemMessage(new LiteralText("Remember that claims are three dimensional. Don't forget to expand up/down or select a big enough area...").formatted(Formatting.LIGHT_PURPLE).formatted(Formatting.ITALIC), player.getUuid());
-                }
-                cir.setReturnValue(ActionResult.SUCCESS);
+        if (((Object)this == Items.STICK && !player.isSneaking()) || ((Object)this == Items.AIR && player.isSneaking())) {
+            Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(context.getPlayer());
+            if (posPair == null) return;
+            else posPair = new Pair<>(context.getBlockPos(), posPair.getRight());
+            ClaimManager.INSTANCE.stickPositions.put(context.getPlayer(), posPair);
+            context.getPlayer().sendSystemMessage(new LiteralText("Position #2 set: " + context.getBlockPos().getX() + (ItsMineConfig.main().claims2d ? "" : " " + context.getBlockPos().getY()) + " " + context.getBlockPos().getZ()).formatted(Formatting.GREEN), player.getUuid());
+            if (posPair.getRight() != null) {
+                player.sendSystemMessage(new LiteralText("Area Selected. Type /claim create <name> to create your claim!").formatted(Formatting.GOLD), player.getUuid());
+                if (!ItsMineConfig.main().claims2d) player.sendSystemMessage(new LiteralText("Remember that claims are three dimensional. Don't forget to expand up/down or select a big enough area...").formatted(Formatting.LIGHT_PURPLE).formatted(Formatting.ITALIC), player.getUuid());
             }
+            cir.setReturnValue(ActionResult.SUCCESS);
         }
     }
 }

@@ -16,7 +16,7 @@ public class StickCommand {
         LiteralArgumentBuilder<ServerCommandSource> stick = literal("stick");
         stick.executes(context -> {
             Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(context.getSource().getPlayer());
-            context.getSource().sendFeedback(new LiteralText(posPair == null ? "You can now use a stick to create claims. Run this command again to disable" : "Claim stick disabled. Run this command again to enable").formatted(Formatting.DARK_PURPLE), false);
+            context.getSource().sendFeedback(new LiteralText(posPair == null ? "You can now use a stick or sneak right-/leftclick to create claims. Run this command again to disable" : "Claim stick disabled. Run this command again to enable").formatted(Formatting.DARK_PURPLE), false);
             if (posPair == null) {
                 ClaimManager.INSTANCE.stickPositions.put(context.getSource().getPlayer(), new Pair<>(null, null));
             } else {

@@ -103,20 +103,18 @@ public abstract class ServerPlayerInteractionManagerMixin {
     /*Mixin to check for left click of stick (for selecting claim) and to check block breaking*/
     @Redirect(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean canBreak(ServerWorld world, PlayerEntity player, BlockPos pos) {
-        if (player.inventory.getMainHandStack().getItem() == Items.STICK) {
-            if (!player.isSneaking()) {
-                Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(player);
-                if (posPair != null) {
-                    posPair = new Pair<>(posPair.getLeft(), pos);
-                    ClaimManager.INSTANCE.stickPositions.put(player, posPair);
-                    player.sendSystemMessage(new LiteralText("Position #1 set: " + pos.getX() + (ItsMineConfig.main().claims2d ? "" : " " + pos.getY()) + " " + pos.getZ()).formatted(Formatting.GREEN), player.getUuid());
-                    if (posPair.getLeft() != null) {
-                        player.sendSystemMessage(new LiteralText("Area Selected. Type /claim create <name> to create your claim!").formatted(Formatting.GOLD), player.getUuid());
-                        if (!ItsMineConfig.main().claims2d)
-                            player.sendSystemMessage(new LiteralText("Remember that claims are three dimensional. Don't forget to expand up/down or select a big enough area...").formatted(Formatting.LIGHT_PURPLE).formatted(Formatting.ITALIC), player.getUuid());
-                    }
-                    return false;
+        Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(player);
+        if ((player.inventory.getMainHandStack().getItem() == Items.STICK && !player.isSneaking()) || (player.inventory.getMainHandStack().getItem() == Items.AIR) && player.isSneaking()) {
+            if (posPair != null) {
+                posPair = new Pair<>(posPair.getLeft(), pos);
+                ClaimManager.INSTANCE.stickPositions.put(player, posPair);
+                player.sendSystemMessage(new LiteralText("Position #1 set: " + pos.getX() + (ItsMineConfig.main().claims2d ? "" : " " + pos.getY()) + " " + pos.getZ()).formatted(Formatting.GREEN), player.getUuid());
+                if (posPair.getLeft() != null) {
+                    player.sendSystemMessage(new LiteralText("Area Selected. Type /claim create <name> to create your claim!").formatted(Formatting.GOLD), player.getUuid());
+                    if (!ItsMineConfig.main().claims2d)
+                        player.sendSystemMessage(new LiteralText("Remember that claims are three dimensional. Don't forget to expand up/down or select a big enough area...").formatted(Formatting.LIGHT_PURPLE).formatted(Formatting.ITALIC), player.getUuid());
                 }
+                return false;
             }
         }
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, player.world.getDimension());

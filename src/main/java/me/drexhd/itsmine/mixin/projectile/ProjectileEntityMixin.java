@@ -48,9 +48,7 @@ public abstract class ProjectileEntityMixin {
                 EntityUtil.canDamage(this.getOwner().getUuid(), claim, entity)) {
             this.onEntityHit(entityHitResult);
         } else {
-            System.out.println("else");
             if (this.getOwner() instanceof PlayerEntity) {
-                System.out.println("instanceof PlayerEntity");
                 MessageUtil.sendTranslatableMessage((PlayerEntity) this.getOwner(), "messages", "attackEntity");
                 if (projectileEntity.getType() == EntityType.ARROW) {
                     projectileEntity.kill();
