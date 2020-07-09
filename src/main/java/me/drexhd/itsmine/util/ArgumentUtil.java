@@ -93,9 +93,7 @@ public class ArgumentUtil {
 
     private static CompletableFuture<Suggestions> claimProvider(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
         GameProfile gameProfile = ClaimManager.INSTANCE.getGameProfile(context);
-        System.out.println("gameProfile " + gameProfile.getName() + " " + gameProfile.getId());
         ServerPlayerEntity player = context.getSource().getPlayer();
-        System.out.println("player " + player.getName() + " " + player.getUuid());
         List<String> names = new ArrayList<>();
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
         if (current != null) names.add(current.getName());

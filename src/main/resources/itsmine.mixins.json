@@ -21,7 +21,6 @@
     "projectile.OwnedProjectile",
     "projectile.ProjectileEntityMixin",
     "EnderPearlItemMixin",
-    "StickClaimItemMixin",
     "EntityMixin",
     "EnderDragonEntityMixin",
     "FarmlandBlockMixin",
