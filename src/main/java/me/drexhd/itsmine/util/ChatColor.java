@@ -247,7 +247,6 @@ public enum ChatColor {
         String[] strings = input.split("(?=(((\\&([0-9]|[a-f])){1}(\\&(k|l|m|n|o|r)){0,5}))|^(\\&([0-9]|[a-f]))?(\\&(k|l|m|n|o|r)){1,5})");
         MutableText text = new LiteralText("");
         for(String string : strings) {
-            System.out.println(string);
             char[] b = string.toCharArray();
             ArrayList<Formatting> formattings = new ArrayList<>();
             for (int i = 0; i < b.length - 1; i++) {

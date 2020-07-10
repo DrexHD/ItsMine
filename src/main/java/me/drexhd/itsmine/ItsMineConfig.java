@@ -1,6 +1,7 @@
 package me.drexhd.itsmine;
 
 import com.google.common.reflect.TypeToken;
+import me.drexhd.itsmine.util.MessageUtil;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -35,7 +36,7 @@ public class ItsMineConfig {
 
 
         } catch (IOException | ObjectMappingException e) {
-            System.out.println("Exception loading config file");
+            MessageUtil.LOGGER.error("Exception loading config file", e);
             e.printStackTrace();
         }
     }

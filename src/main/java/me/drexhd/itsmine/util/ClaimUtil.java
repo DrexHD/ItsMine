@@ -99,10 +99,10 @@ public class ClaimUtil {
             if (!claims.exists() && claims_old.exists()) throw new FileNotFoundException();
             ClaimManager.INSTANCE.fromNBT(NbtIo.readCompressed(new FileInputStream(claims)));
         } catch (IOException e) {
-            System.out.println("Could not load " + claims.getName() + ":");
+            MessageUtil.LOGGER.error("Could not load " + claims.getName(), e);
             e.printStackTrace();
             if (claims_old.exists()) {
-                System.out.println("Attempting to load backup claims...");
+                MessageUtil.LOGGER.info("Attempting to load backup...");
                 try {
                     ClaimManager.INSTANCE.fromNBT(NbtIo.readCompressed(new FileInputStream(claims_old)));
                 } catch (IOException e2) {

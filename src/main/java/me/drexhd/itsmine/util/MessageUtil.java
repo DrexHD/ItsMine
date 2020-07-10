@@ -16,8 +16,7 @@ import java.util.Map;
 
 public class MessageUtil {
 
-    private static final Logger LOGGER = LogManager.getLogger("ItsMine");
-    private static ArrayList<String> debugMessages = new ArrayList<>();
+    public static final Logger LOGGER = LogManager.getLogger("ItsMine");
 
 
     public static void sendPage(ServerCommandSource source, Text header, int entries, int page, String command, ArrayList<Text> content) {
@@ -69,7 +68,6 @@ public class MessageUtil {
     public static Map<String, String> createMap(String... strings) {
         Map<String, String> map = new HashMap<>();
         if (strings.length % 2 == 1) {
-            System.out.println("Invalid length");
         } else {
             for (int i = 0; i < strings.length; i = i + 2) {
                 map.put(strings[i], strings[i + 1]);
@@ -83,9 +81,7 @@ public class MessageUtil {
     @Nullable
     public static Map<String, Text> createTextMap(Object... objects) {
         Map<String, Text> map = new HashMap<>();
-        System.out.println("Length: " + objects.length);
         if (objects.length % 2 == 1) {
-            System.out.println("Invalid length");
         } else {
             for (int i = 0; i < objects.length; i = i + 2) {
                 if (objects[i] instanceof String && objects[i + 1] instanceof Text) {
@@ -139,7 +135,6 @@ public class MessageUtil {
                 }
             }
             text.append(new LiteralText(ChatColor.translateAlternateColorCodes('&', s + " ")));
-            System.out.println(text);
         }
         return text;
     }
@@ -231,7 +226,7 @@ public class MessageUtil {
     }
 
     public static void debug(String debug) {
-        if(SharedConstants.isDevelopment) System.out.println(debug);
+        if (SharedConstants.isDevelopment) LOGGER.debug(debug);
     }
 
     public static void log(String log) {

@@ -1,6 +1,7 @@
 package me.drexhd.itsmine.mixin;
 
 import me.drexhd.itsmine.ClaimManager;
+import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.util.registry.RegistryTracker;
@@ -13,7 +14,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 
 @Mixin(LevelStorage.Session.class)
@@ -28,14 +31,14 @@ public class LevelStorageSessionMixin {
             File claimDataFile = new File(directory.toFile(), "claims.dat");
             if (claimDataFile.exists()) {
                 File old = new File(directory.toFile(), "claims.dat_old");
-                System.out.println("Saving NBT File: " + claimDataFile.getName() + " " + claimDataFile.length()+ "b " + claimDataFile.getAbsolutePath());
-                if(claimDataFile.length() > 45){
-                    System.out.println("Creating backup of NBT File: " + claimDataFile.getName());
+                MessageUtil.log("Saving NBT File: " + claimDataFile.getName() + " " + claimDataFile.length() / 1000 + "kb ");
+                if (claimDataFile.length() > 45) {
+                    MessageUtil.log("Creating backup of NBT File: " + claimDataFile.getName());
                     if (old.exists()) old.delete();
                     claimDataFile.renameTo(old);
                     claimDataFile.delete();
                 } else {
-                    System.out.println("Aborting backup!" + claimDataFile.getName() + " may be broken, keeping " + old.getName());
+                    MessageUtil.LOGGER.warn("Backup aborted!" + claimDataFile.getName() + " may be broken, keeping " + old.getName());
                 }
             }
             try {
@@ -43,8 +46,7 @@ public class LevelStorageSessionMixin {
                 CompoundTag tag = ClaimManager.INSTANCE.toNBT();
                 NbtIo.writeCompressed(tag, new FileOutputStream(claimDataFile));
             } catch (IOException e) {
-                System.out.println("Could not save " + claimDataFile.getName() + ":");
-                e.printStackTrace();
+                MessageUtil.LOGGER.error("Could not save " + claimDataFile.getName(), e);
             }
         }
     }
