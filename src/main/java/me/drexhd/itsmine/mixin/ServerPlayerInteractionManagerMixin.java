@@ -82,8 +82,8 @@ public abstract class ServerPlayerInteractionManagerMixin {
                     (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
                     (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
                     (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
-                    (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) /*||
-                (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "shulker_box"))*/)) {
+                    (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) ||
+                (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "SHULKERBOXES")))) {
                 MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().interactBlock);
                 return ActionResult.FAIL;
             }
