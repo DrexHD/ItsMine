@@ -17,11 +17,8 @@ public class CommandManager {
     public static void register() {
         LiteralArgumentBuilder<ServerCommandSource> main = LiteralArgumentBuilder.literal("itsmine");
         LiteralArgumentBuilder<ServerCommandSource> alias = LiteralArgumentBuilder.literal("claim");
-//        LiteralArgumentBuilder<ServerCommandSource> test = LiteralArgumentBuilder.literal("convert");
         register(main, dispatcher);
         register(alias, dispatcher);
-//        test.executes(CommandManager::generateCommands);
-//        dispatcher.register(test);
         dispatcher.register(main);
         dispatcher.register(alias);
     }
@@ -32,7 +29,6 @@ public class CommandManager {
         BlockCommand.register(command);
         CreateCommand.register(command);
         ClaimCommand.register(command, dispatcher);
-//        DebugCommand.register(command);
         ExpandCommand.register(command, false);
         FlyCommand.register(command);
         HelpCommand.register(command);

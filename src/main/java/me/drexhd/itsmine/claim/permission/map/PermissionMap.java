@@ -8,25 +8,14 @@ public abstract class PermissionMap {
 
     protected static HashMap<String, Class<? extends PermissionMap>> mapTypes = new HashMap<>();
     protected static HashMap<Class<? extends PermissionMap>, String> reverseMapTypes = new HashMap<>();
+
     static {
         mapTypes.put("default", DefaultMap.class);
         mapTypes.put("inverted", InvertedMap.class);
         reverseMapTypes.put(DefaultMap.class, "default");
         reverseMapTypes.put(InvertedMap.class, "inverted");
     }
-    public abstract HashMap<String, Boolean> getPermissionList();
-    public abstract boolean isPermissionSet(String permission);
-    public abstract boolean hasPermission(String permission);
-    public abstract boolean hasPermission(String permission, String child);
-    public abstract void setPermission(String permission, boolean has);
-    public abstract void clearPermission(String permission);
-    public abstract void fromNBT(CompoundTag tag);
-    public abstract CompoundTag toNBT();
-    public CompoundTag toRegisteredNBT() {
-        CompoundTag tag = toNBT();
-        tag.putString("type", reverseMapTypes.get(this.getClass()));
-        return tag;
-    }
+
     public static PermissionMap fromRegisteredNBT(CompoundTag tag) {
         String type = tag.getString("type");
         tag.remove("type");
@@ -40,6 +29,28 @@ public abstract class PermissionMap {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public abstract HashMap<String, Boolean> getPermissionList();
+
+    public abstract boolean isPermissionSet(String permission);
+
+    public abstract boolean hasPermission(String permission);
+
+    public abstract boolean hasPermission(String permission, String child);
+
+    public abstract void setPermission(String permission, boolean has);
+
+    public abstract void clearPermission(String permission);
+
+    public abstract void fromNBT(CompoundTag tag);
+
+    public abstract CompoundTag toNBT();
+
+    public CompoundTag toRegisteredNBT() {
+        CompoundTag tag = toNBT();
+        tag.putString("type", reverseMapTypes.get(this.getClass()));
+        return tag;
     }
 
 }

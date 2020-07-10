@@ -49,6 +49,8 @@ public enum Permission {
             Permission perm = byID(parent);
             if (perm != null) {
                 PermissionGroup permGroup = perm.permissionGroup;
+                //This is to check for permissions which don't have a permission group, but have been parsed with one
+                if (permGroup == null) return false;
                 for (String string : permGroup.list) {
                     if (string.equals(child)) return true;
                 }
@@ -61,18 +63,15 @@ public enum Permission {
 
 
     public enum PermissionGroup {
-        BLOCK(new ArrayList<String>(){{
+        BLOCK(new ArrayList<String>() {{
             for (Block block : Registry.BLOCK) {
                 this.add(Registry.BLOCK.getId(block).getPath());
             }
         }}),
-        BLOCK_ENTITY(new ArrayList<String>(){{
-/*            for(BlockEntityType blockEntityType : Registry.BLOCK_ENTITY_TYPE) {
-                this.add(Registry.BLOCK_ENTITY_TYPE.getId(blockEntityType).getPath());
-            }*/
+        BLOCK_ENTITY(new ArrayList<String>() {{
             for (Block block : Registry.BLOCK) {
-                if(BlockUtil.isInteractAble(block))
-                this.add(Registry.BLOCK.getId(block).getPath());
+                if (BlockUtil.isInteractAble(block))
+                    this.add(Registry.BLOCK.getId(block).getPath());
             }
             this.add("TRAPDOORS");
             this.add("DOORS");
@@ -83,21 +82,21 @@ public enum Permission {
             this.remove("command_block");
             this.remove("structure_block");
         }}),
-        ENTITY(new ArrayList<String>(){{
+        ENTITY(new ArrayList<String>() {{
             for (EntityType entityType : Registry.ENTITY_TYPE) {
                 this.add(Registry.ENTITY_TYPE.getId(entityType).getPath());
             }
         }}),
-        ITEM(new ArrayList<String>(){{
+        ITEM(new ArrayList<String>() {{
             for (Item item : Registry.ITEM) {
-                if(!(item instanceof BlockItem)){
+                if (!(item instanceof BlockItem)) {
                     this.add(Registry.ITEM.getId(item).getPath());
                 }
                 this.add("FOODS");
                 this.add("BOATS");
             }
         }}),
-        MODIFY(new ArrayList<String>(){{
+        MODIFY(new ArrayList<String>() {{
             add("size");
             add("flags");
             add("permissions");

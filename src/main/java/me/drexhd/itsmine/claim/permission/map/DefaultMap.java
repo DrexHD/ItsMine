@@ -1,5 +1,6 @@
 package me.drexhd.itsmine.claim.permission.map;
 
+import me.drexhd.itsmine.claim.permission.Permission;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -41,7 +42,8 @@ public class DefaultMap extends PermissionMap {
     public void fromNBT(CompoundTag tag) {
         permissions.clear();
         for (String permission : tag.getKeys()) {
-            permissions.put(convert(permission), tag.getBoolean(convert(permission)));
+            if (Permission.isValid(permission))
+                permissions.put(permission, tag.getBoolean(permission));
         }
     }
 
@@ -52,18 +54,5 @@ public class DefaultMap extends PermissionMap {
             if (allowed != null) tag.putBoolean(permission, allowed);
         });
         return tag;
-    }
-
-    private String convert(String original) {
-        String s = original;
-        if(s.equals("interact_blocks")) return "interact_block";
-        if(s.equals("interact_doors")) return "interact_block.DOORS";
-        if(s.equals("damage_entities")) return "damage_entity";
-        if(s.equals("use.buttons")) return "interact_block.BUTTONS";
-        if(s.equals("container")) return "interact_block.CONTAINERS";
-        if(s.equals("container.shulkerbox")) return "interact_block.shulkerbox";
-        if(s.equals("container.chest")) return "interact_block.chest";
-        if(s.equals("container.enderchest")) return "interact_block.enderchest";
-        return s;
     }
 }

@@ -1,5 +1,6 @@
 package me.drexhd.itsmine.claim.permission.map;
 
+import me.drexhd.itsmine.claim.permission.Permission;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -41,7 +42,8 @@ public class InvertedMap extends PermissionMap {
     public void fromNBT(CompoundTag tag) {
         permissions.clear();
         for (String permission : tag.getKeys()) {
-            permissions.put(permission, tag.getBoolean(permission));
+            if (Permission.isValid(permission))
+                permissions.put(permission, tag.getBoolean(permission));
         }
     }
 

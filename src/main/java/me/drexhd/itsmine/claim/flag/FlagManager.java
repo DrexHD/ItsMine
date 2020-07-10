@@ -36,7 +36,8 @@ public class FlagManager {
     public void fromNBT(CompoundTag tag) {
         flags.clear();
         for (String flag : tag.getKeys()) {
-            flags.put(flag, tag.getBoolean(flag));
+            if (Flag.isValid(flag))
+                flags.put(flag, tag.getBoolean(flag));
         }
     }
 
