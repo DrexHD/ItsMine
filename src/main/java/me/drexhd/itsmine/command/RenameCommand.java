@@ -43,7 +43,7 @@ public class RenameCommand {
             context.getSource().sendError(new LiteralText("Invalid claim name"));
             return -1;
         }
-        Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), name);
+        Claim claim = ClaimManager.INSTANCE.getClaim(context, name);
         ClaimUtil.validateClaim(claim);
         if (ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), newName) != null) {
             context.getSource().sendError(new LiteralText("That name is already taken!"));
@@ -53,8 +53,7 @@ public class RenameCommand {
             context.getSource().sendError(new LiteralText("You don't have permission to modify claim properties!"));
             return -1;
         }
-        if(claim.isChild) claim.name = ClaimUtil.getParentClaim(claim).name + "." + newName;
-        else claim.name = newName;
+        claim.name = newName;
 //        ClaimManager.INSTANCE.updateClaim(claim);
         context.getSource().sendFeedback(new LiteralText("Renamed Claim " + name + " to " + claim.name).formatted(Formatting.GOLD), admin);
         return -1;
