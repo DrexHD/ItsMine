@@ -1,6 +1,7 @@
 package me.drexhd.itsmine.mixin.projectile;
 
 import me.drexhd.itsmine.ClaimManager;
+import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.EntityUtil;
 import me.drexhd.itsmine.util.MessageUtil;
@@ -49,7 +50,7 @@ public abstract class ProjectileEntityMixin {
             this.onEntityHit(entityHitResult);
         } else {
             if (this.getOwner() instanceof PlayerEntity) {
-                MessageUtil.sendTranslatableMessage((PlayerEntity) this.getOwner(), "messages", "attackEntity");
+                MessageUtil.sendTranslatableMessage((PlayerEntity) this.getOwner(), ItsMineConfig.main().message().attackEntity);
                 if (projectileEntity.getType() == EntityType.ARROW) {
                     projectileEntity.kill();
                 }

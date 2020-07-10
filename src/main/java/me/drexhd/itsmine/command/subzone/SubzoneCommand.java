@@ -20,7 +20,7 @@ public class SubzoneCommand {
     public static void registerSubzone(LiteralArgumentBuilder<ServerCommandSource> command, CommandDispatcher dispatcher, boolean admin) {
         CreateCommand.register(command, admin);
         ExpandCommand.register(command, admin);
-        InfoCommand.register(command, getSubzones());
+        InfoCommand.register(command, getSubzones(), admin);
         MessageCommand.register(command, admin, getSubzones());
         PermissionCommand.register(command, admin, getSubzones());
         RemoveCommand.register(command, getSubzones(), admin);

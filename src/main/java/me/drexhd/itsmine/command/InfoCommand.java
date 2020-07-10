@@ -22,14 +22,17 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class InfoCommand {
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim) {
+    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
         LiteralArgumentBuilder<ServerCommandSource> info = literal("info");
         RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
         info.executes(context -> info(context, ""));
         claim.executes(context -> info(context, getString(context, "claim")));
-        claimOwner.then(claim);
-        info.then(claimOwner);
-        info.then(claim);
+        if (admin) {
+            claimOwner.then(claim);
+            info.then(claimOwner);
+        } else {
+            info.then(claim);
+        }
         command.then(info);
     }
 

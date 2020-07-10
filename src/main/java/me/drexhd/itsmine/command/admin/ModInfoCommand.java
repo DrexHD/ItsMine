@@ -7,11 +7,11 @@ import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.server.command.ServerCommandSource;
 
-public class InfoCommand {
+public class ModInfoCommand {
 
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command) {
-        LiteralArgumentBuilder<ServerCommandSource> info = LiteralArgumentBuilder.literal("info");
-        info.executes(InfoCommand::execute);
+        LiteralArgumentBuilder<ServerCommandSource> info = LiteralArgumentBuilder.literal("modinfo");
+        info.executes(ModInfoCommand::execute);
         command.then(info);
     }
 

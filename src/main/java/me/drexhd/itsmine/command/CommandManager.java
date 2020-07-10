@@ -36,7 +36,7 @@ public class CommandManager {
         ExpandCommand.register(command, false);
         FlyCommand.register(command);
         HelpCommand.register(command);
-        InfoCommand.register(command, getClaims());
+        InfoCommand.register(command, getClaims(), false);
         ListCommand.register(command);
         MessageCommand.register(command, false, getClaims());
         PermissionCommand.register(command, false, getClaims());

@@ -37,8 +37,8 @@ public class TrustedCommand {
         trusted.then(claimArgument);
         command.then(trusted);
 
-        trusted.executes((context)-> {
-            Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        trusted.executes((context) -> {
+            Claim claim = ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension());
             validateClaim(claim);
             return showTrustedList(context, claim, false);
         });
@@ -49,7 +49,7 @@ public class TrustedCommand {
             return showTrustedList(context, claim, false);
         });
     }
-    
+
     static int showTrustedList(CommandContext<ServerCommandSource> context, Claim claim, boolean showSelf) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         ServerPlayerEntity player = source.getPlayer();
@@ -73,9 +73,7 @@ public class TrustedCommand {
             if (profile != null) {
                 owner = new LiteralText(profile.getName());
             } else {
-                owner = new LiteralText(uuid.toString()).styled((style) -> {
-                    return style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()));
-                });
+                owner = new LiteralText(uuid.toString()).styled((style) -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString())));
             }
 
             pText.append(new LiteralText(atomicInteger.get() + ". ").formatted(Formatting.GOLD))

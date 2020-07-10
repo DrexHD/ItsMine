@@ -45,9 +45,12 @@ public class FlagCommand {
         id.then(set);
         id.then(reset);
         claim.then(id);
-        claimOwner.then(claim);
-        flags.then(claimOwner);
-        flags.then(claim);
+        if (admin) {
+            claimOwner.then(claim);
+            flags.then(claimOwner);
+        } else {
+            flags.then(claim);
+        }
         command.then(flags);
     }
 

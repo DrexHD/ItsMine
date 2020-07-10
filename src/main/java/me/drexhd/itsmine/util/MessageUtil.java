@@ -113,6 +113,13 @@ public class MessageUtil {
         }
     }
 
+    private static String translate(Map<String, String> var, String message) {
+        for (Map.Entry<String, String> entry : var.entrySet()) {
+            message = message.replaceAll(entry.getKey(), entry.getValue());
+        }
+        return message;
+    }
+
 
     @Deprecated
     private static Text getConfigText(Map<String, Text> var, Object... path) {
@@ -162,7 +169,11 @@ public class MessageUtil {
     }
 
     public static void sendTranslatableMessage(ServerCommandSource source, Map<String, String> var, String string) {
-        sendMessage(source, getConfigString(var, string));
+        sendMessage(source, translate(var, string));
+    }
+
+    public static void sendTranslatableMessage(ServerCommandSource source, String string) {
+        sendMessage(source, string);
     }
 
     @Deprecated

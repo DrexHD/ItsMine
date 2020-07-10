@@ -38,7 +38,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements ClaimSho
         Claim claim = ClaimManager.INSTANCE.getClaimAt(entity.getBlockPos(), entity.world.getDimension());
         if (claim != null) {
             if (!claim.hasPermission(playerEntity.getGameProfile().getId(), "interact_entity", Registry.ENTITY_TYPE.getId(entity.getType()).getPath())) {
-                MessageUtil.sendTranslatableMessage(playerEntity, "messages", "interactEntity");
+                MessageUtil.sendTranslatableMessage(playerEntity, ItsMineConfig.main().message().interactEntity);
                 return ActionResult.FAIL;
             }
         }

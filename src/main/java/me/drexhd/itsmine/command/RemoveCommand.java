@@ -33,9 +33,12 @@ public class RemoveCommand {
         confirm.executes(context -> delete(context, admin));
         claim.executes(context -> requestDelete(context, admin));
         claim.then(confirm);
-        delete.then(claim);
-        claimOwner.then(claim);
-        delete.then(claimOwner);
+        if (admin) {
+            claimOwner.then(claim);
+            delete.then(claimOwner);
+        } else {
+            delete.then(claim);
+        }
         command.then(delete);
     }
 

@@ -148,6 +148,11 @@ public class ArgumentUtil {
         return CommandSource.suggestMatching(strings, builder);
     }
 
+    public static final SuggestionProvider<ServerCommandSource> EMPTY = (source, builder) -> {
+        List<String> strings = new ArrayList<>();
+        return CommandSource.suggestMatching(strings, builder);
+    };
+
     public static final SuggestionProvider<ServerCommandSource> PLAYERS_PROVIDER = (source, builder) -> {
         List<String> strings = new ArrayList<>();
         for (ServerPlayerEntity player : source.getSource().getMinecraftServer().getPlayerManager().getPlayerList()) {
@@ -156,6 +161,11 @@ public class ArgumentUtil {
         return CommandSource.suggestMatching(strings, builder);
     };
 
+    /** @param profiles a collection of profiles usually from GameProfileArgument
+     * @param context CommandContext to get the UserCache
+     * @throws CommandSyntaxException if the Collection contains 0 or more than 1 profiles
+     * @return a GameProfile
+    **/
     public static GameProfile getGameProfile(Collection<GameProfile> profiles, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         GameProfile gameProfile;
         if (profiles.size() > 1) {

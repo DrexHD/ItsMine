@@ -50,9 +50,12 @@ public class PermissionCommand {
         permNode.then(reset);
         player.then(permNode);
         claim.then(player);
-        permissions.then(claim);
-        claimOwner.then(claim);
-        permissions.then(claimOwner);
+        if (admin) {
+            claimOwner.then(claim);
+            permissions.then(claimOwner);
+        } else {
+            permissions.then(claim);
+        }
         command.then(permissions);
     }
 

@@ -30,14 +30,17 @@ public class TrustCommand {
         {
             LiteralArgumentBuilder<ServerCommandSource> trust = literal("trust");
             RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> player = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
-            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(EMPTY)*/;
 
             player.executes((context -> executeTrust(context, true, "", admin)));
             claim.executes((context -> executeTrust(context, true, getString(context, "claim"), admin)));
 
-            claimOwner.then(claim);
-            player.then(claim);
-            player.then(claimOwner);
+            if (admin) {
+                claimOwner.then(claim);
+                player.then(claimOwner);
+            } else {
+                player.then(claim);
+            }
             trust.then(player);
             command.then(trust);
             dispatcher.register(trust);
@@ -45,7 +48,7 @@ public class TrustCommand {
         {
             LiteralArgumentBuilder<ServerCommandSource> distrust = literal("distrust");
             RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> player = argument("player", GameProfileArgumentType.gameProfile()).suggests(PLAYERS_PROVIDER);
-            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
+            RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(EMPTY)*/;
 
             player.executes((context -> executeTrust(context, false, "", admin)));
             claim.executes((context -> executeTrust(context, false, getString(context, "claim"), admin)));

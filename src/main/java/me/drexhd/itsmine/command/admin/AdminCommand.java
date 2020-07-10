@@ -3,10 +3,7 @@ package me.drexhd.itsmine.command.admin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.drexhd.itsmine.ItsMine;
-import me.drexhd.itsmine.command.MessageCommand;
-import me.drexhd.itsmine.command.PermissionCommand;
-import me.drexhd.itsmine.command.FlagCommand;
-import me.drexhd.itsmine.command.RemoveCommand;
+import me.drexhd.itsmine.command.*;
 import me.drexhd.itsmine.command.subzone.SubzoneCommand;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -30,7 +27,8 @@ public class AdminCommand {
         EntitiesCommand.register(admin);
         ExpandCommand.register(admin);
         IgnoreCommand.register(admin);
-        InfoCommand.register(admin);
+        ModInfoCommand.register(admin);
+        InfoCommand.register(admin, getClaims(), true);
         ListAllCommand.register(admin);
         MessageCommand.register(admin, true, getClaims());
         OwnerCommand.register(admin);

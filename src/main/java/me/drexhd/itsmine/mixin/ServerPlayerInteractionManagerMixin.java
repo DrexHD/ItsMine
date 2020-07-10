@@ -84,7 +84,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
                     (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
                     (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) /*||
                 (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "shulker_box"))*/)) {
-                MessageUtil.sendTranslatableMessage(player, "messages", "interactBlock");
+                MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().interactBlock);
                 return ActionResult.FAIL;
             }
         }
@@ -116,14 +116,14 @@ public abstract class ServerPlayerInteractionManagerMixin {
                 if ((claim.hasPermission(uuid, "build")) || claim.hasPermission(uuid, "place", Registry.ITEM.getId(item).getPath())) {
                     return false;
                 } else {
-                    MessageUtil.sendTranslatableMessage(player, "messages", "placeBlock");
+                    MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().placeBlock);
                     return true;
                 }
             } else {
                 if (claim.hasPermission(uuid, "use_item", Registry.ITEM.getId(item).getPath())) {
                     return false;
                 } else {
-                    MessageUtil.sendTranslatableMessage(player, "messages", "useItem");
+                    MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().useItem);
                     return true;
                 }
             }
@@ -155,7 +155,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
             if (claim.hasPermission(player.getUuid(), "build") || claim.hasPermission(player.getUuid(), "break", block)) {
                 return true;
             } else {
-                MessageUtil.sendTranslatableMessage(player, "messages", "breakBlock");
+                MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().breakBlock);
                 return false;
             }
         }
