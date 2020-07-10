@@ -60,7 +60,7 @@ public class CreateCommand {
             return -1;
         }
 
-        if (ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), claim.name + "." + name) != null) {
+        if (ClaimManager.INSTANCE.getClaim(source.getPlayer().getUuid(), name) != null) {
             source.sendFeedback(new LiteralText("The name \"" + claim.name + "." + name + "\" is already taken.").formatted(Formatting.RED), false);
             return -1;
         }
@@ -72,13 +72,11 @@ public class CreateCommand {
         } else if (selectedPositions.getRight() == null) {
             source.sendFeedback(new LiteralText("You need to specify block positions or select position #2(Left Click) with a stick.").formatted(Formatting.RED), false);
         } else {
-//            name = claim.name + "." + name;
             subZone = createSubzone(source, name, selectedPositions.getLeft(), selectedPositions.getRight(), admin);
             if (subZone.dimension == claim.dimension && claim.includesPosition(subZone.min) && claim.includesPosition(subZone.max) && !claim.isChild){
                 if (!ClaimManager.INSTANCE.wouldSubzoneIntersect((subZone))){
                     claim.addSubzone(subZone);
                     ClaimManager.INSTANCE.addClaim(subZone);
-                    subZone.permissionManager = claim.permissionManager;
                     executeShowClaim(source, claim, false);
                     source.sendFeedback(new LiteralText("").append(new LiteralText("Your subzone was created.").formatted(Formatting.GREEN)), false);
                 }else{

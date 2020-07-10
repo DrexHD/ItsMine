@@ -104,7 +104,7 @@ public class CreateCommand {
 
         Claim claim = new Claim(name, admin ? null : uuid, min, max, source.getWorld().getDimension(), source.getPlayer().getBlockPos(), false);
         if (cOwnerName != null) claim.customOwnerName = cOwnerName;
-        if ((ClaimManager.INSTANCE.getClaim(ClaimManager.defaultUUID, name) == null)) {
+        if ((ClaimManager.INSTANCE.getClaim(uuid, name) == null)) {
             if (!ClaimManager.INSTANCE.wouldIntersect(claim)) {
                 // works because only the first statement is evaluated if true
                 if ((admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.INFINITE_BLOCKS, 2)) || ClaimManager.INSTANCE.useClaimBlocks(uuid, subInt)) {

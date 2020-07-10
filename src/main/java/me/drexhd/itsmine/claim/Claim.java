@@ -140,7 +140,7 @@ public class Claim {
      * @return true if the player has the permission, false if the doesn't
      */
     public boolean hasPermission(UUID player, String parent) {
-        MessageUtil.debug(this.name + " checking " + parent + " for " + player);
+        MessageUtil.debug(this.name + ": Checking " + parent + " for " + player);
         if (player == null) return false;
         if (parent.matches("[a-z_]+[.][\\w_]+")) {
             return hasPermission(player, parent.split("[.]")[0], parent.split("[.]")[1]);
@@ -157,7 +157,7 @@ public class Claim {
     }
 
     public boolean hasPermission(UUID player, String parent, String child) {
-        MessageUtil.debug(this.name + " checking " + parent + "." + child + " for " + player);
+        MessageUtil.debug(this.name + ": Checking " + parent + "." + child + " for " + player);
         if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
