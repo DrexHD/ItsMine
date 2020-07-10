@@ -7,7 +7,6 @@ import me.drexhd.itsmine.MonitorableWorld;
 import me.drexhd.itsmine.claim.flag.FlagManager;
 import me.drexhd.itsmine.claim.permission.PermissionManager;
 import me.drexhd.itsmine.util.ClaimUtil;
-import me.drexhd.itsmine.util.MessageUtil;
 import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -140,7 +139,6 @@ public class Claim {
      * @return true if the player has the permission, false if the doesn't
      */
     public boolean hasPermission(UUID player, String parent) {
-        MessageUtil.debug("Checking permission (" + player + ", " + parent + ")");
         if (player == null) return false;
         if (parent.matches("[a-z_]+[.][\\w_]+")) {
             return hasPermission(player, parent.split("[.]")[0], parent.split("[.]")[1]);
@@ -157,7 +155,6 @@ public class Claim {
     }
 
     public boolean hasPermission(UUID player, String parent, String child) {
-        System.out.println("Checking permission (" + player + ", " + parent + ", " + child + ")");
         if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {

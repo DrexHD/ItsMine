@@ -8,6 +8,7 @@ import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
 import me.drexhd.itsmine.util.ClaimUtil;
+import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -23,9 +24,15 @@ public class RenameCommand {
         LiteralArgumentBuilder<ServerCommandSource> rename = literal("rename");
         RequiredArgumentBuilder<ServerCommandSource, String> claimArgument = ArgumentUtil.getClaims();
         RequiredArgumentBuilder<ServerCommandSource, String> nameArgument = argument("name", word());
+        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = RequiredArgumentBuilder.argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
         nameArgument.executes((context) -> rename(context, admin));
         claimArgument.then(nameArgument);
-        rename.then(claimArgument);
+        if (admin) {
+            claimOwner.then(claimArgument);
+            rename.then(claimOwner);
+        } else {
+            rename.then(claimArgument);
+        }
         command.then(rename);
     }
 

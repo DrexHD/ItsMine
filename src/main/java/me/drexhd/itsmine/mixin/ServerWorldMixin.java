@@ -64,37 +64,7 @@ public abstract class ServerWorldMixin extends World implements MonitorableWorld
             ((ClaimPlayerEntity) playerEntity).tickMessageCooldown();
         });
 
-/*        if(!ItsMine.convert.isEmpty()) {
-            Iterator iterator = ItsMine.convert.iterator();
-            String player = (String) iterator.next();
-            ItsMine.convert.remove(player);
-            System.out.println("Checking " + player);
-            Scoreboard scoreboard = ItsMine.scoreboard;
-            ScoreboardObjective minutes = scoreboard.getObjective("minutes");
-            ScoreboardObjective votes = scoreboard.getObjective("totalVotes");
-            int min = scoreboard.getPlayerScore(player, minutes).getScore();
-            int vote = scoreboard.getPlayerScore(player, votes).getScore();
-            ServerCommandSource source = ItsMine.source;
-            if(min >= 300 && vote >= 6) run(source, player, "player");
-            if(min >= 1500 && vote >= 24) run(source, player, "player_plus");
-            if(min >= 5000 && vote >= 48) run(source, player, "member");
-            if(min >= 10000 && vote >= 72) run(source, player, "kilocrafter");
-            if(min >= 30000 && vote >= 150) run(source, player, "kilocrafter_plus");
-            System.out.println(ItsMine.convert.size() + " left!");
-        }*/
     }
-
-/*    private static void run(ServerCommandSource source, String player, String group) {
-        StopWatch watch = new StopWatch();
-        watch.start();
-        source.getMinecraftServer().getUserCache();
-        GameProfile gameProfile = source.getMinecraftServer().getUserCache().findByName(player);
-        if(gameProfile == null) return;
-        watch.stop();
-        String timeElapsed = new DecimalFormat("##.##").format(watch.getTime(TimeUnit.MILLISECONDS));
-        System.out.println("Converting "+ gameProfile.getId() + " - " + gameProfile.getName() + " (" + group + ") in " + timeElapsed);
-        source.getMinecraftServer().getCommandManager().execute(source, "/lp user " + gameProfile.getId() + " parent add " + group);
-    }*/
 
 
     @Override

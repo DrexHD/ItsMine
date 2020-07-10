@@ -6,9 +6,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMine;
-import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
+import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.PermissionUtil;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.arguments.EntityArgumentType;
@@ -28,6 +28,9 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class TransferCommand {
+
+    private static Map<UUID, String> pendingClaimTransfers = new HashMap<>();
+
     public static void register(LiteralArgumentBuilder<ServerCommandSource> command) {
 
         LiteralArgumentBuilder<ServerCommandSource> transfer = literal("transfer");
@@ -35,65 +38,53 @@ public class TransferCommand {
         RequiredArgumentBuilder<ServerCommandSource, EntitySelector> player = argument("player", EntityArgumentType.player());
         LiteralArgumentBuilder<ServerCommandSource> confirm = literal("confirm");
         confirm.executes(context -> {
-        final String string = "-accept-";
-        ServerPlayerEntity p = EntityArgumentType.getPlayer(context, "player");
-        String input = getString(context, "claim");
-        String claimName = input.replace(string, "");
-        Claim claim1 = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
-        if (claim1 == null) {
-            context.getSource().sendError(Messages.INVALID_CLAIM);
-            return -1;
-        }
-        if (input.startsWith(string)) {
-            return acceptTransfer(context.getSource());
-        }
-        return transfer(context.getSource(), claim1, p, false);
-    });
-            player.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), EntityArgumentType.getPlayer(context, "player"), false));
-            player.then(confirm);
-            claim.then(player);
-            transfer.then(claim);
-            transfer.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension()), EntityArgumentType.getPlayer(context, "player"), false));
-            command.then(transfer);
+            final String string = "-accept-";
+            ServerPlayerEntity p = EntityArgumentType.getPlayer(context, "player");
+            String input = getString(context, "claim");
+            String claimName = input.replace(string, "");
+            Claim claim1 = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), claimName);
+            ClaimUtil.validateClaim(claim1);
+            if (input.startsWith(string)) {
+                return acceptTransfer(context.getSource());
+            }
+            return transfer(context.getSource(), claim1, p, false);
+        });
+        player.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), EntityArgumentType.getPlayer(context, "player"), false));
+        player.then(confirm);
+        claim.then(player);
+        transfer.then(claim);
+        transfer.executes(context -> requestTransfer(context.getSource(), ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension()), EntityArgumentType.getPlayer(context, "player"), false));
+        command.then(transfer);
     }
 
     public static int acceptTransfer(ServerCommandSource sender) throws CommandSyntaxException {
         Claim claim = ClaimManager.INSTANCE.getClaim(sender.getPlayer().getUuid(), pendingClaimTransfers.get(sender.getPlayer().getGameProfile().getId()));
-        if (claim == null) {
-            sender.sendFeedback(new LiteralText("You have no pending claim transfers").formatted(Formatting.RED), false);
-            return 0;
-        }
+        ClaimUtil.validateClaim(claim);
         ServerPlayerEntity player = sender.getMinecraftServer().getPlayerManager().getPlayer(claim.claimBlockOwner);
         if (player != null) {
             player.sendSystemMessage(new LiteralText("").append(new LiteralText(sender.getPlayer().getGameProfile().getName() + " has taken ownership of the claim \"" + claim.name + "\"").formatted(Formatting.YELLOW)), player.getUuid());
         }
-//        PermissionMap op = claim.permissionManager.playerPermissions.get(claim.claimBlockOwner);
-//        claim.permissionManager.playerPermissions.put(claim.claimBlockOwner, claim.permissionManager.playerPermissions.get(sender.getPlayer().getGameProfile().getId()));
-//        claim.permissionManager.playerPermissions.put(sender.getPlayer().getGameProfile().getId(), op);
-        claim.claimBlockOwner = sender.getPlayer().getGameProfile().getId();
+        UUID uuid = sender.getPlayer().getGameProfile().getId();
+        //Update claim
+        ClaimManager.INSTANCE.removeClaim(claim);
+        claim.claimBlockOwner = uuid;
+        ClaimManager.INSTANCE.removeClaim(claim);
+        //Update subzones
         claim.subzones.forEach(subzone -> {
-            try {
-//                PermissionMap op = subzone.permissionManager.playerPermissions.get(subzone.claimBlockOwner);
-//                subzone.permissionManager.playerPermissions.put(subzone.claimBlockOwner, subzone.permissionManager.playerPermissions.get(sender.getPlayer().getGameProfile().getId()));
-//                subzone.permissionManager.playerPermissions.put(sender.getPlayer().getGameProfile().getId(), op);
-                subzone.claimBlockOwner = sender.getPlayer().getGameProfile().getId();
-            } catch (CommandSyntaxException e) {
-                e.printStackTrace();
-            }
+            ClaimManager.INSTANCE.removeClaim(subzone);
+            subzone.claimBlockOwner = uuid;
+            ClaimManager.INSTANCE.addClaim(subzone);
         });
         return 0;
     }
 
     private static int requestTransfer(ServerCommandSource sender, Claim claim, ServerPlayerEntity player, boolean admin) throws CommandSyntaxException {
-        if (claim == null) {
-            sender.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
-        if(claim.isChild){
+        ClaimUtil.validateClaim(claim);
+        if (claim.isChild) {
             sender.sendFeedback(new LiteralText("You can't transfer ownership of subzones").formatted(Formatting.RED), false);
             return 0;
         }
-        if(sender.getPlayer().getUuidAsString().equalsIgnoreCase(player.getUuidAsString())){
+        if (sender.getPlayer().getUuidAsString().equalsIgnoreCase(player.getUuidAsString())) {
             sender.sendFeedback(new LiteralText("Huh? That makes no sence").formatted(Formatting.RED), true);
             return 0;
         }
@@ -109,12 +100,9 @@ public class TransferCommand {
                 .append(new LiteralText("[YES]").styled(style -> style.withColor(Formatting.DARK_RED).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (admin ? "/claim admin" : "/claim") + " transfer " + claim.name + " " + player.getGameProfile().getName() + " confirm")))), false);
         return 0;
     }
-    private static Map<UUID, String> pendingClaimTransfers = new HashMap<>();
+
     private static int transfer(ServerCommandSource sender, Claim claim, ServerPlayerEntity player, boolean admin) throws CommandSyntaxException {
-        if (claim == null) {
-            sender.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
+        ClaimUtil.validateClaim(claim);
         if (claim.isChild) {
             sender.sendFeedback(new LiteralText("You can't transfer ownership of subzones").formatted(Formatting.RED), false);
             return 0;

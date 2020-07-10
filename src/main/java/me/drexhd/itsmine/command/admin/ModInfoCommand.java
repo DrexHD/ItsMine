@@ -28,7 +28,7 @@ public class ModInfoCommand {
                 claims++;
             }
         }
-        MessageUtil.sendMessage(source, "&6ItsMine" + "\n" + "&e* Loaded Claims: &b" + claims + "\n" + "&e* Loaded Subzones: &3" + subzones + "\n" + "&e* Total Area: &b" + totalArea + "(Ø" + totalArea / claims + ")" + "\n" + "&e* DataVersion: &6" + ClaimManager.INSTANCE.getDataVersion());
+        MessageUtil.sendMessage(source, "&6ItsMine" + "\n" + "&e* Loaded Claims: &b" + claims + "\n" + "&e* Loaded Subzones: &3" + subzones + "\n" + "&e* Total Area: &b" + totalArea + " (Ø" + totalArea / claims + ")" + "\n" + "&e* DataVersion: &6" + ClaimManager.INSTANCE.getDataVersion());
         return 1;
     }
 

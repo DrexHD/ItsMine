@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.command.*;
+import me.drexhd.itsmine.command.RenameCommand;
 import me.drexhd.itsmine.command.subzone.SubzoneCommand;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -36,9 +37,10 @@ public class AdminCommand {
         ReloadCommand.register(admin);
         RemoveCommand.register(admin, getClaims(), true);
         RemoveAllCommand.register(admin);
-        RenameCommand.register(admin);
+        RenameCommand.register(admin, true);
         FlagCommand.register(admin, true, getClaims());
         SubzoneCommand.register(admin, dispatcher, true);
+        TrustedCommand.register(admin, true);
     }
 
     private static Predicate<ServerCommandSource> perm(String str) {

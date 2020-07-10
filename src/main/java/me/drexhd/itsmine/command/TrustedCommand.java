@@ -27,15 +27,11 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class TrustedCommand {
 
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, boolean admin) {
         LiteralArgumentBuilder<ServerCommandSource> trusted = literal("trusted");
         RequiredArgumentBuilder<ServerCommandSource, String> claimArgument = ArgumentUtil.getClaims();
         RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
 
-        claimOwner.then(claimArgument);
-        trusted.then(claimOwner);
-        trusted.then(claimArgument);
-        command.then(trusted);
 
         trusted.executes((context) -> {
             Claim claim = ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension());
@@ -48,6 +44,13 @@ public class TrustedCommand {
             validateClaim(claim);
             return showTrustedList(context, claim, false);
         });
+        if (admin) {
+            claimOwner.then(claimArgument);
+            trusted.then(claimOwner);
+        } else {
+            trusted.then(claimArgument);
+        }
+        command.then(trusted);
     }
 
     static int showTrustedList(CommandContext<ServerCommandSource> context, Claim claim, boolean showSelf) throws CommandSyntaxException {

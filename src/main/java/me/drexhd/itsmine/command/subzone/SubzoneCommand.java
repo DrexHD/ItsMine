@@ -30,6 +30,6 @@ public class SubzoneCommand {
         RevenueCommand.register(command, getSubzones());
         FlagCommand.register(command, admin, getSubzones());
         TrustCommand.register(command, dispatcher, getSubzones(), admin);
-        TrustedCommand.register(command);
+        TrustedCommand.register(command, admin);
     }
 }

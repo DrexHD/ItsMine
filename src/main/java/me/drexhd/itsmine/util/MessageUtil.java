@@ -130,15 +130,12 @@ public class MessageUtil {
             String parts[] = s.split("(?<=[\\§][\\w])");
             for (String string : parts) {
                 if (string.matches("%[\\w]+%")) {
-                    System.out.println("Checking: " + string);
                     for (Map.Entry<String, Text> entry : var.entrySet()) {
                         if (entry.getKey().equals(string)) {
-                            System.out.println("Replacing " + string + " with " + entry.getValue());
                             text.append(entry.getValue()).append(" ");
                         }
                     }
                 } else {
-                    System.out.println("Didnt pass: " + string);
                 }
             }
             text.append(new LiteralText(ChatColor.translateAlternateColorCodes('&', s + " ")));
@@ -183,6 +180,10 @@ public class MessageUtil {
 
     public static void sendTranslatableMessage(PlayerEntity player, Object... path) {
         sendMessage(player, getConfigString(path));
+    }
+
+    public static void sendTranslatableMessage(PlayerEntity player, String string) {
+        sendMessage(player, string);
     }
 
     public static void sendTranslatableMessage(PlayerEntity player, Map<String, String> var, Object... path) {

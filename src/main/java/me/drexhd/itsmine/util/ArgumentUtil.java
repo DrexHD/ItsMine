@@ -98,9 +98,7 @@ public class ArgumentUtil {
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
         if (current != null) names.add(current.getName());
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
-            System.out.println("Claim " + claim.name);
             if (claim != null && !claim.isChild/* && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin"))*/) {
-                System.out.println("added claim " + claim.name);
                 names.add(claim.getName());
             }
         }

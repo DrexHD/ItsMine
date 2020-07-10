@@ -3,16 +3,14 @@ package me.drexhd.itsmine.command.admin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.ClaimManager;
-import me.drexhd.itsmine.Messages;
+import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
+import me.drexhd.itsmine.util.ClaimUtil;
 import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
-
-import java.util.Collection;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -28,34 +26,16 @@ public class OwnerCommand {
 
             newOwner.executes((context) -> {
                 Claim claim = ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getPlayer().world.getDimension());
-                if (claim == null) {
-                    context.getSource().sendError(Messages.INVALID_CLAIM);
-                    return -1;
-                }
-
-                Collection<GameProfile> profiles = GameProfileArgumentType.getProfileArgument(context, "newOwner");
-
-                if (profiles.size() > 1) {
-                    context.getSource().sendError(Messages.TOO_MANY_SELECTIONS);
-                    return -1;
-                }
-                return setOwner(context.getSource(), claim, profiles.iterator().next());
+                ClaimUtil.validateClaim(claim);
+                GameProfile profile = ArgumentUtil.getGameProfile(GameProfileArgumentType.getProfileArgument(context, "newOwner"), context);
+                return setOwner(context.getSource(), claim, profile);
             });
 
             claimArgument.executes((context) -> {
                 Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
-                if (claim == null) {
-                    context.getSource().sendError(Messages.INVALID_CLAIM);
-                    return -1;
-                }
-
-                Collection<GameProfile> profiles = GameProfileArgumentType.getProfileArgument(context, "newOwner");
-
-                if (profiles.size() > 1) {
-                    context.getSource().sendError(Messages.TOO_MANY_SELECTIONS);
-                    return -1;
-                }
-                return setOwner(context.getSource(), claim, profiles.iterator().next());
+                ClaimUtil.validateClaim(claim);
+                GameProfile profile = ArgumentUtil.getGameProfile(GameProfileArgumentType.getProfileArgument(context, "newOwner"), context);
+                return setOwner(context.getSource(), claim, profile);
             });
 
             newOwner.then(claimArgument);
@@ -70,19 +50,13 @@ public class OwnerCommand {
 
             nameArgument.executes((context) -> {
                 Claim claim = ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getPlayer().world.getDimension());
-                if (claim == null) {
-                    context.getSource().sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-                    return -1;
-                }
+                ClaimUtil.validateClaim(claim);
                 return setOwnerName(context.getSource(), claim, getString(context, "newName"));
             });
 
             claimArgument.executes((context) -> {
                 Claim claim = ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim"));
-                if (claim == null) {
-                    context.getSource().sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-                    return -1;
-                }
+                ClaimUtil.validateClaim(claim);
                 return setOwnerName(context.getSource(), claim, getString(context, "newName"));
             });
 
@@ -108,7 +82,10 @@ public class OwnerCommand {
                         .append(new LiteralText(oldOwner == null ? "(" + claim.claimBlockOwner + ")" : oldOwner.getName()).formatted(Formatting.GOLD))
                         .append(new LiteralText(" for ").formatted(Formatting.YELLOW)).append(new LiteralText(claim.name).formatted(Formatting.GOLD))
                 , false);
+        //Update ClaimList
+        ClaimManager.INSTANCE.removeClaim(claim);
         claim.claimBlockOwner = profile.getId();
+        ClaimManager.INSTANCE.addClaim(claim);
         return 1;
     }
 }
