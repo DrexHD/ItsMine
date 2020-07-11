@@ -13,8 +13,6 @@ public abstract class ServerCommandOutputMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void saveInstance(MinecraftServer server, CallbackInfo ci) {
-        ClaimManager.INSTANCE = new ClaimManager();
-        ClaimManager.server = server;
-
+        new ClaimManager(server);
     }
 }

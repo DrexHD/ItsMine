@@ -25,13 +25,19 @@ import java.util.*;
 public class ClaimManager {
     public static ClaimManager INSTANCE = null;
     public static MinecraftServer server;
-    public static final UUID defaultUUID = new UUID(0,0);
+    public static final GameProfile serverProfile = new GameProfile(new UUID(0,0), "Server");
     public Map<PlayerEntity, Pair<BlockPos, BlockPos>> stickPositions = new HashMap<>();
     public List<UUID> ignoringClaims = new ArrayList<>();
     public List<UUID> flyers = new ArrayList<>();
     private HashMap<UUID, Integer> blocksLeft = new HashMap<>();
     private ClaimList claimList = new ClaimList();
     private int dataVersion = 1;
+
+    public ClaimManager(MinecraftServer minecraftServer) {
+        server = minecraftServer;
+        server.getUserCache().add(serverProfile);
+        INSTANCE = this;
+    }
 
     public int getClaimBlocks(UUID id) {
         return blocksLeft.getOrDefault(id, ItsMineConfig.main().claims2d ? ItsMineConfig.main().claimBlock().default2D : ItsMineConfig.main().claimBlock().default3D);
