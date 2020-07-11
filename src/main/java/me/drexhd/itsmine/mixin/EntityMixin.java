@@ -96,7 +96,7 @@ public abstract class EntityMixin {
                         shouldChange(player) &&
                             (!ClaimManager.INSTANCE.flyers.contains(player.getUuid()) ||
                                     claim == null ||
-                                    !claim.hasPermission(player.getGameProfile().getId(), "flight") ||
+                                    !claim.hasPermission(player.getGameProfile().getId(), "flight", null) ||
                                     !Functions.canFly((ServerPlayerEntity) player))
                 ) {
                     player.abilities.allowFlying = false;
@@ -112,7 +112,7 @@ public abstract class EntityMixin {
                                 ClaimManager.INSTANCE.flyers.contains(player.getUuid()) &&
                                 shouldChange(player) &&
                                 claim != null
-                                && claim.hasPermission(player.getUuid(), "flight")
+                                && claim.hasPermission(player.getUuid(), "flight", null)
                                 && Functions.canFly((ServerPlayerEntity) player)
                 ) {
                     player.abilities.allowFlying = true;

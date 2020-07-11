@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.claim.permission.DefaultPermissionList;
 import me.drexhd.itsmine.util.ArgumentUtil;
 import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,6 +32,7 @@ public class ClaimManager {
     public List<UUID> flyers = new ArrayList<>();
     private HashMap<UUID, Integer> blocksLeft = new HashMap<>();
     private ClaimList claimList = new ClaimList();
+    private DefaultPermissionList defaultPermissionList = new DefaultPermissionList();
     private int dataVersion = 1;
 
     public ClaimManager(MinecraftServer minecraftServer) {
@@ -81,6 +83,10 @@ public class ClaimManager {
             ServerCommandSource source = context.getSource();
             return source.getMinecraftServer().getUserCache().getByUuid(source.getPlayer().getUuid());
         }
+    }
+
+    public DefaultPermissionList getDefaultPerms() {
+        return this.defaultPermissionList;
     }
 
     public List<Claim> getPlayerClaims(UUID id) {
@@ -166,6 +172,7 @@ public class ClaimManager {
             tag1.putUuid("uuid", flyer);
             listTag.add(tag1);
         }
+        root.put("defaultPermissions", defaultPermissionList.toNBT());
         root.put("flyers", listTag);
         root.put("ignoring", ignoring);
         root.putInt("dataVersion", dataVersion);
@@ -190,6 +197,8 @@ public class ClaimManager {
             CompoundTag tag1 = listTag.getCompound(i);
             flyers.add(tag1.getUuid("uuid"));
         }
+        defaultPermissionList.fromNBT(tag.getCompound("defaultPermissions"));
+
         int oldDataVersion = tag.getInt("dataVersion");
         loadClaims(tag, oldDataVersion, dataVersion);
     }

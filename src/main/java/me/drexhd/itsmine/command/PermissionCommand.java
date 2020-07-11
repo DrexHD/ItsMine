@@ -99,7 +99,7 @@ public class PermissionCommand {
         ClaimUtil.validateClaim(claim);
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         String input = StringArgumentType.getString(context, "permission");
-        boolean permission = claim.hasPermission(gameProfile.getId(), input);
+        boolean permission = claim.hasPermission(gameProfile.getId(), input, null);
         MessageSection messageSection = ItsMineConfig.main().message();
         String value = permission ? messageSection.getTrue() : messageSection.getFalse();
         UUID uuid = context.getSource().getPlayer().getUuid();
@@ -120,19 +120,12 @@ public class PermissionCommand {
         GameProfile gameProfile = getGameProfile(GameProfileArgumentType.getProfileArgument(context, "player"), context);
         UUID uuid = context.getSource().getPlayer().getUuid();
         if (claim.canModifySettings(uuid) || admin) {
-            MessageUtil.sendText(context.getSource(), new LiteralText("Permissions (").formatted(Formatting.YELLOW).append(gameProfile.getName()).formatted(Formatting.GOLD).append(")").formatted(Formatting.YELLOW).append(Messages.Command.getPermissions(claim, gameProfile.getId())));
+            MessageUtil.sendText(context.getSource(), new LiteralText("Permissions (").formatted(Formatting.YELLOW).append(gameProfile.getName()).formatted(Formatting.GOLD).append(")").formatted(Formatting.YELLOW).append(Messages.Command.getPermission(claim, gameProfile.getId())));
             return 1;
         } else {
             MessageUtil.sendTranslatableMessage(context.getSource(), ItsMineConfig.main().message().invalidPermission);
             return 0;
         }
     }
-
-
-
-/*
-    TODO: Return a list of all permissions of a player when you do not type a permission eg. /claim permission shop DrexHD
-*/
-
 
 }

@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.command.*;
-import me.drexhd.itsmine.command.RenameCommand;
 import me.drexhd.itsmine.command.subzone.SubzoneCommand;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -25,6 +24,7 @@ public class AdminCommand {
     private static void registerAdmin(LiteralArgumentBuilder<ServerCommandSource> admin, CommandDispatcher dispatcher) {
         BlocksCommand.register(admin);
         CreateCommand.register(admin);
+        DefaultPermissionCommand.register(admin);
         EntitiesCommand.register(admin);
         ExpandCommand.register(admin);
         IgnoreCommand.register(admin);

@@ -26,7 +26,7 @@ public class PlaceOnUseBlockMixin extends Item {
     public boolean canModify(World world, PlayerEntity player, BlockPos pos) {
         if (!(world instanceof ServerWorld)) return world.canPlayerModifyAt(player, pos);
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, player.world.getDimension());
-        if (claim != null && !claim.hasPermission(player.getUuid(), "build")) {
+        if (claim != null && !claim.hasPermission(player.getUuid(), "build", null)) {
             if ((Object) this instanceof LilyPadItem){
                 ((ServerWorld)world).getChunkManager().markForUpdate(pos);
             }

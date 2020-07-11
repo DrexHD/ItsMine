@@ -137,36 +137,32 @@ public class Claim {
      *
      * @param player the uuid of the player, who's permission you want to check
      * @param parent the permission node (eg: break)
+     * @param child  the child node (eg: stone)
      * @return true if the player has the permission, false if the doesn't
      */
-    public boolean hasPermission(UUID player, String parent) {
-        MessageUtil.debug(this.name + ": Checking " + parent + " for " + player);
+    public boolean hasPermission(UUID player, String parent, @Nullable String child) {
+        String permission = child == null ? parent : parent + "." + child;
+        MessageUtil.debug(this.name + ": Checking " + permission + " for " + player + " (hasPermission)");
         if (player == null) return false;
-        if (parent.matches("[a-z_]+[.][\\w_]+")) {
-            return hasPermission(player, parent.split("[.]")[0], parent.split("[.]")[1]);
-        }
         UUID tenant = this.rentManager.getTenant();
-        /*Check whether or not the player is a claim tenant and return true unless it's a modify permission*/
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
             return true;
         }
-        /*claimBlockOwner might be null*/
         if (claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
         return ClaimManager.INSTANCE.ignoringClaims.contains(player) ||
-                permissionManager.hasPermission(player, parent);
+                permissionManager.hasPermission(player, parent, child);
     }
 
-    public boolean hasPermission(UUID player, String parent, String child) {
-        MessageUtil.debug(this.name + ": Checking " + parent + "." + child + " for " + player);
+    public boolean isPermissionDenied(UUID player, String parent, @Nullable String child) {
+        String permission = child == null ? parent : parent + "." + child;
+        MessageUtil.debug(this.name + ": Checking " + permission + " for " + player + " (isPermissionDenied)");
         if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
-            return true;
+            return false;
         }
-        if (claimBlockOwner != null && claimBlockOwner.equals(player)) return true;
-        return ClaimManager.INSTANCE.ignoringClaims.contains(player) ||
-                permissionManager.hasPermission(player, parent) ||
-                permissionManager.hasPermission(player, parent, child);
+        if (claimBlockOwner != null && claimBlockOwner.equals(player) || ClaimManager.INSTANCE.ignoringClaims.contains(player)) return false;
+        return permissionManager.isPermissionDenied(player, parent, child);
     }
 
     public boolean canModifySettings(UUID uuid) {

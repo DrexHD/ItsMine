@@ -76,16 +76,24 @@ public abstract class ServerPlayerInteractionManagerMixin {
         if (claim != null) {
             UUID uuid = player.getUuid();
             Block block = blockState.getBlock();
-            if ((BlockUtil.isInteractAble(block)/*isBlockEntity(block) || BlockUtil.isShulkerBox(block) || BlockUtil.isButton(block) || BlockUtil.isTrapdoor(block) || BlockUtil.isDoor(block) || BlockUtil.isContainer(block)*/) && !(claim.hasPermission(uuid, "interact_block") ||
-                    claim.hasPermission(uuid, "interact_block", Registry.BLOCK.getId(block).getPath()) ||
-                    (BlockUtil.isButton(block) && claim.hasPermission(uuid, "interact_block", "BUTTONS")) ||
-                    (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
-                    (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
-                    (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
-                    (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) ||
-                (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "SHULKERBOXES")))) {
-                MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().interactBlock);
-                return ActionResult.FAIL;
+            if (BlockUtil.isInteractAble(block)) {
+                if (claim.isPermissionDenied(uuid, "interact_block", Registry.BLOCK.getId(block).getPath())) {
+                    MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().interactBlock);
+                    return ActionResult.FAIL;
+                } else {
+                    if (claim.hasPermission(uuid, "interact_block", Registry.BLOCK.getId(block).getPath()) ||
+                            (BlockUtil.isButton(block) && claim.hasPermission(uuid, "interact_block", "BUTTONS")) ||
+                            (BlockUtil.isTrapdoor(block) && claim.hasPermission(uuid, "interact_block", "TRAPDOORS")) ||
+                            (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
+                            (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
+                            (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) ||
+                            (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "SHULKERBOXES"))) {
+                        return blockState.onUse(world, player, hand, hit);
+                    } else {
+                        MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().interactBlock);
+                        return ActionResult.FAIL;
+                    }
+                }
             }
         }
         return blockState.onUse(world, player, hand, hit);
@@ -113,18 +121,24 @@ public abstract class ServerPlayerInteractionManagerMixin {
             Item item = stack.getItem();
             UUID uuid = player.getUuid();
             if (item instanceof BlockItem || item instanceof BucketItem) {
-                if ((claim.hasPermission(uuid, "build")) || claim.hasPermission(uuid, "place", Registry.ITEM.getId(item).getPath())) {
+                if ((claim.hasPermission(uuid, "build", null)) || claim.hasPermission(uuid, "place", Registry.ITEM.getId(item).getPath())) {
                     return false;
                 } else {
                     MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().placeBlock);
                     return true;
                 }
             } else {
-                if (claim.hasPermission(uuid, "use_item", Registry.ITEM.getId(item).getPath())) {
-                    return false;
-                } else {
+                if (claim.isPermissionDenied(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath())) {
                     MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().useItem);
                     return true;
+                } else {
+                    if (claim.hasPermission(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath()) || (ItemUtil.isFood(item) && claim.hasPermission(player.getUuid(), "use_item", "FOODS")) ||
+                            (ItemUtil.isBoat(item) && claim.hasPermission(player.getUuid(), "use_item", "BOATS"))) {
+                        return false;
+                    } else {
+                        MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().useItem);
+                        return true;
+                    }
                 }
             }
         }
@@ -152,7 +166,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, player.world.getDimension());
         String block = Registry.BLOCK.getId(player.getEntityWorld().getBlockState(pos).getBlock()).getPath();
         if (claim != null) {
-            if (claim.hasPermission(player.getUuid(), "build") || claim.hasPermission(player.getUuid(), "break", block)) {
+            if (claim.hasPermission(player.getUuid(), "build", null) || claim.hasPermission(player.getUuid(), "break", block)) {
                 return true;
             } else {
                 MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().breakBlock);
@@ -172,12 +186,17 @@ public abstract class ServerPlayerInteractionManagerMixin {
         }
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, world.getDimension());
         if (claim != null) {
-            if (claim.hasPermission(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath()) ||
-                    (ItemUtil.isFood(item) && claim.hasPermission(player.getUuid(), "use_item", "FOODS")) ||
-                    (ItemUtil.isBoat(item) && claim.hasPermission(player.getUuid(), "use_item", "BOATS"))) {
-                return itemStack.use(world, player, hand);
-            } else {
+            if (claim.isPermissionDenied(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath())) {
+                MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().useItem);
                 return TypedActionResult.fail(itemStack);
+            } else {
+                if (claim.hasPermission(player.getUuid(), "use_item", Registry.ITEM.getId(item).getPath()) || (ItemUtil.isFood(item) && claim.hasPermission(player.getUuid(), "use_item", "FOODS")) ||
+                        (ItemUtil.isBoat(item) && claim.hasPermission(player.getUuid(), "use_item", "BOATS"))) {
+                    return itemStack.use(world, player, hand);
+                } else {
+                    MessageUtil.sendTranslatableMessage(player, ItsMineConfig.main().message().useItem);
+                    return TypedActionResult.fail(itemStack);
+                }
             }
         }
         return itemStack.use(world, player, hand);

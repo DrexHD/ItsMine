@@ -15,17 +15,12 @@ public class InvertedMap extends PermissionMap {
 
     @Override
     public boolean isPermissionSet(String permission) {
-        return true;
+        return permissions.containsKey(permission);
     }
 
     @Override
-    public boolean hasPermission(String parent) {
-        return !permissions.containsKey(parent) || permissions.get(parent);
-    }
-
-    @Override
-    public boolean hasPermission(String parent, String child) {
-        return (!permissions.containsKey(parent) || permissions.get(parent)) || (!permissions.containsKey(parent + "." + child) || permissions.get(parent + "." + child));
+    public boolean hasPermission(String permission) {
+        return !permissions.containsKey(permission) || permissions.get(permission);
     }
 
     @Override

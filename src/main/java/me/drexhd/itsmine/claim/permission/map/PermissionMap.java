@@ -37,8 +37,6 @@ public abstract class PermissionMap {
 
     public abstract boolean hasPermission(String permission);
 
-    public abstract boolean hasPermission(String permission, String child);
-
     public abstract void setPermission(String permission, boolean has);
 
     public abstract void clearPermission(String permission);

@@ -10,8 +10,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Messages {
     public static final MutableText PREFIX = new LiteralText(ChatColor.translate(ItsMineConfig.main().prefix));
@@ -171,27 +171,15 @@ public class Messages {
     public static class Command {
         public static Text getFlags(Claim claim) {
             MutableText claimFlags = new LiteralText("");
-            boolean nextEnabled = false;
-            boolean nextDisabled = false;
-            boolean nextPartly = false;
-            Formatting formatting;
 
             for (Flag value : Flag.values()) {
                 boolean enabled = claim.flagManager.hasFlag(value.getID());
-                if (enabled) {
-                    if (nextEnabled) formatting = Formatting.GREEN;
-                    else formatting = Formatting.DARK_GREEN;
-                    nextEnabled = !nextEnabled;
-                } else {
-                    if (nextDisabled) formatting = Formatting.RED;
-                    else formatting = Formatting.DARK_RED;
-                    nextDisabled = !nextDisabled;
-                }
-                claimFlags.append(new LiteralText(" ")).append(new LiteralText(value.getID()).formatted(formatting));
+                claimFlags.append(new LiteralText(" ")).append(new LiteralText(value.getID()).formatted(enabled ? Formatting.DARK_GREEN : Formatting.DARK_RED));
             }
-            return claimFlags.append(getPermissions(claim));
+            return claimFlags.append(getPermission(claim));
         }
-        public static Text getPermissions(Claim claim) {
+
+/*        public static Text getPermissions(Claim claim) {
             MutableText claimPermissions = new LiteralText("");
             boolean nextEnabled = false;
             boolean nextDisabled = false;
@@ -217,7 +205,7 @@ public class Messages {
                             hasNodes.set(true);
                         }
                     });
-                    if(hasNodes.get()) {
+                    if (hasNodes.get()) {
                         if (nextPartly) formatting = Formatting.YELLOW;
                         else formatting = Formatting.GOLD;
                         nextPartly = !nextPartly;
@@ -226,43 +214,49 @@ public class Messages {
                 }
             }
             return claimPermissions;
+        }*/
+
+        public static Text getPermission(Claim claim) {
+            MutableText text = new LiteralText("");
+            //Loop through all permissions
+            for (Permission permission : Permission.values()) {
+                MutableText subNodes = new LiteralText("");
+                boolean value = claim.permissionManager.defaults.hasPermission(permission.id);
+                Formatting color = value ? Formatting.DARK_GREEN : Formatting.DARK_RED;
+                boolean hasNodes = false;
+                //Loop through all permissions of the claim
+                for (Map.Entry<String, Boolean> entry : claim.permissionManager.defaults.getPermissionList().entrySet()) {
+                    if (entry.getKey().startsWith(permission.id)) {
+                        subNodes.append(new LiteralText(entry.getKey()).formatted(entry.getValue() ? Formatting.GREEN : Formatting.RED).append("\n"));
+                        color = value ? Formatting.GREEN : Formatting.RED;
+                        hasNodes = true;
+                    }
+                }
+                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
+            }
+            return text;
         }
 
-        public static Text getPermissions(Claim claim, UUID uuid) {
-            MutableText claimPermissions = new LiteralText("");
-            boolean nextEnabled = false;
-            boolean nextDisabled = false;
-            boolean nextPartly = false;
-            Formatting formatting;
+        public static Text getPermission(Claim claim, UUID uuid) {
+            MutableText text = new LiteralText("");
+            //Loop through all permissions
             for (Permission permission : Permission.values()) {
-                if (claim.permissionManager.isPermissionSet(uuid, permission.id)) {
-                    boolean enabled = claim.permissionManager.hasPermission(uuid, permission.id);
-                    if (enabled) {
-                        formatting = nextEnabled ? Formatting.GREEN : Formatting.DARK_GREEN;
-                        nextEnabled = !nextEnabled;
-                    } else {
-                        formatting = nextDisabled ? Formatting.RED : Formatting.DARK_RED;
-                        nextDisabled = !nextDisabled;
-                    }
-                    claimPermissions.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(formatting));
-                } else {
-                    MutableText subPerm = new LiteralText("");
-                    AtomicBoolean hasNodes = new AtomicBoolean(false);
-                    claim.permissionManager.getPermissionMap(uuid).getPermissionList().forEach((perm, value) -> {
-                        if (perm.startsWith(permission.id)) {
-                            subPerm.append(new LiteralText(perm)).formatted(value ? Formatting.GREEN : Formatting.RED).append("\n");
-                            hasNodes.set(true);
-                        }
-                    });
-                    if(hasNodes.get()) {
-                        if (nextPartly) formatting = Formatting.YELLOW;
-                        else formatting = Formatting.GOLD;
-                        nextPartly = !nextPartly;
-                        claimPermissions.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(formatting).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subPerm))));
+                MutableText subNodes = new LiteralText("");
+                boolean value = claim.permissionManager.hasPermission(uuid, permission.id, null);
+                Formatting color = value ? Formatting.DARK_GREEN : Formatting.DARK_RED;
+                boolean hasNodes = false;
+                //Loop through all permissions of the claim
+                for (Map.Entry<String, Boolean> entry : claim.permissionManager.getPermissionMap(uuid).getPermissionList().entrySet()) {
+                    if (entry.getKey().startsWith(permission.id)) {
+                        subNodes.append(new LiteralText(entry.getKey()).formatted(entry.getValue() ? Formatting.GREEN : Formatting.RED).append("\n"));
+                        color = value ? Formatting.GREEN : Formatting.RED;
+                        hasNodes = true;
                     }
                 }
+                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
             }
-            return claimPermissions;
+            return text;
         }
+
     }
 }

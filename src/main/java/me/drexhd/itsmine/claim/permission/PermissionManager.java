@@ -1,8 +1,10 @@
 package me.drexhd.itsmine.claim.permission;
 
+import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.claim.permission.map.DefaultMap;
 import me.drexhd.itsmine.claim.permission.map.PermissionMap;
 import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,22 +15,75 @@ public class PermissionManager {
     public PermissionMap defaults = new DefaultMap();
     public Map<UUID, PermissionMap> playerPermissions = new HashMap<>();
 
-    public boolean isPermissionSet(UUID player, String parent) {
-        return playerPermissions.get(player) != null && playerPermissions.get(player).isPermissionSet(parent);
+    public boolean isPermissionSet(UUID player, String permission) {
+        return playerPermissions.get(player) != null && playerPermissions.get(player).isPermissionSet(permission);
     }
 
-    public boolean isPermissionSet(UUID player, String parent, String child) {
-        return isPermissionSet(player, parent) || isPermissionSet(player, parent + "." + child);
+    /** This method allows you to check if a permissions has been specifically disabled for a player
+    * */
+    public boolean isPermissionDenied(UUID player, String parent, String child) {
+        String permission = parent + "." + child;
+        if (isPermissionSet(player, permission)) {
+            return !playerPermissions.get(player).hasPermission(permission);
+        } else {
+            if (defaults.isPermissionSet(permission)) {
+                return !defaults.hasPermission(permission);
+            } else {
+                DefaultPermissionList defaultPermissionList = ClaimManager.INSTANCE.getDefaultPerms();
+                if (defaultPermissionList.isPermissionSet(permission)) {
+                    return !defaultPermissionList.hasPermission(permission);
+                } else {
+                    return false;
+                }
+            }
+        }
     }
 
-    public boolean hasPermission(UUID player, String parent) {
-        if (isPermissionSet(player, parent)) return playerPermissions.get(player).hasPermission(parent);
-        return defaults.hasPermission(parent);
-    }
 
-    public boolean hasPermission(UUID player, String parent, String child) {
-        if (isPermissionSet(player, parent, child)) return playerPermissions.get(player).hasPermission(parent, child);
-        return defaults.hasPermission(parent, child);
+    /**
+     * @param parent the root permission node
+     * @param child the permission group node (maybe be null)
+     * @param player uuid of the player who's permission you want to check
+    * @return true if the player has the specified permission, a parent permission or it is set in either default claim permissions or global claim permissions
+    * */
+    public boolean hasPermission(UUID player, String parent, @Nullable String child) {
+        if (child == null) {
+            if (isPermissionSet(player, parent)) {
+                return playerPermissions.get(player).hasPermission(parent);
+            } else {
+                if (defaults.isPermissionSet(parent)) {
+                    return defaults.hasPermission(parent);
+                } else {
+                    DefaultPermissionList defaultPermissionList = ClaimManager.INSTANCE.getDefaultPerms();
+                    if (defaultPermissionList.isPermissionSet(parent)) {
+                        return defaultPermissionList.hasPermission(parent);
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            String permission = parent + "." + child;
+            if (isPermissionSet(player, permission)) {
+                return playerPermissions.get(player).hasPermission(permission);
+            } else {
+                if (defaults.isPermissionSet(permission)) {
+                    return defaults.hasPermission(permission);
+                } else {
+                    //Before checking the global permissions, check if the parent flag is set to true in the claim
+                    if (hasPermission(player, parent, null)) {
+                        return true;
+                    } else {
+                        DefaultPermissionList defaultPermissionList = ClaimManager.INSTANCE.getDefaultPerms();
+                        if (defaultPermissionList.isPermissionSet(permission)) {
+                            return defaultPermissionList.hasPermission(permission);
+                        } else {
+                            return hasPermission(player, parent, null);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public PermissionMap getPermissionMap(UUID player) {

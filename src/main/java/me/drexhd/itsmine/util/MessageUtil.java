@@ -168,11 +168,6 @@ public class MessageUtil {
         sendMessage(source, string);
     }
 
-    @Deprecated
-    public static void sendTranslatableMessageWithText(ServerCommandSource source, Map<String, Text> var, Object... path) {
-        sendMessage(source, getConfigText(var, path));
-    }
-
     public static void sendTranslatableMessage(PlayerEntity player, Object... path) {
         sendMessage(player, getConfigString(path));
     }
@@ -186,39 +181,26 @@ public class MessageUtil {
     }
 
     public static void sendMessage(ServerCommandSource source, String message) {
-        sendMessage(source, message, null);
-    }
-
-    public static void sendMessage(ServerCommandSource source, String message, String hover) {
-        source.sendFeedback(getLiteralText(message, hover), false);
+        sendMessage(source, message, true);
     }
 
     public static void sendMessage(PlayerEntity player, String message) {
-        sendMessage(player, message, null);
+        sendMessage(player, message, true);
     }
 
-    public static void sendMessage(PlayerEntity player, String message, String hover) {
-        player.sendMessage(getLiteralText(message, hover), false);
+    public static void sendMessage(ServerCommandSource source, String message, boolean prefix) {
+        source.sendFeedback(getLiteralText(message, prefix), false);
     }
 
-    @Deprecated
-    public static void sendMessage(ServerCommandSource source, Text message) {
-        String prefix = getConfigValue("prefix");
-        MutableText p = new LiteralText(ChatColor.translateAlternateColorCodes('&', prefix + message));
-        source.sendFeedback(p.append(message), false);
+    public static void sendMessage(PlayerEntity player, String message, boolean prefix) {
+        player.sendMessage(getLiteralText(message, prefix), false);
     }
 
-    private static Text getLiteralText(String message, String hover) {
-        String prefix = getConfigValue("prefix");
-        if (prefix != null) {
-            if (hover == null) {
-                return new LiteralText(ChatColor.translateAlternateColorCodes('&', prefix + message));
-            } else {
-                return new LiteralText(ChatColor.translateAlternateColorCodes('&', prefix + message)).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(ChatColor.translateAlternateColorCodes('&', hover)))));
-            }
-        } else {
-            return new LiteralText(ChatColor.translateAlternateColorCodes('&', message));
-        }
+
+
+    private static Text getLiteralText(String message, boolean usePrefix) {
+        String prefix = usePrefix ? getConfigValue("prefix") : "";
+        return new LiteralText(ChatColor.translateAlternateColorCodes('&', prefix + message));
     }
 
     public static String getConfigValue(Object... path) {

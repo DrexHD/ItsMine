@@ -91,7 +91,7 @@ public class TrustedCommand {
             MutableText perms = new LiteralText("");
 
             for (Permission value : Permission.values()) {
-                if (claim.permissionManager.hasPermission(uuid, value.id)) {
+                if (claim.permissionManager.hasPermission(uuid, value.id, null)) {
                     Formatting formatting = nextColor ? Formatting.GREEN : Formatting.DARK_GREEN;
                     perms.append(new LiteralText(value.id).formatted(formatting)).append(new LiteralText(" "));
                     if (i == 3) perms.append(new LiteralText("\n"));

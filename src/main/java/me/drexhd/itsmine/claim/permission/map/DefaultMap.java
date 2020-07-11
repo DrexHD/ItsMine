@@ -24,11 +24,6 @@ public class DefaultMap extends PermissionMap {
     }
 
     @Override
-    public boolean hasPermission(String parent, String child) {
-        return (isPermissionSet(parent) && permissions.get(parent)) || (isPermissionSet(parent + "." + child) && permissions.get(parent + "." + child));
-    }
-
-    @Override
     public void setPermission(String permission, boolean has) {
         permissions.put(permission, has);
     }
