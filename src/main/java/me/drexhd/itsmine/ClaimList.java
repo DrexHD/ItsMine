@@ -5,7 +5,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.UUID;
 
 public class ClaimList {
 
@@ -42,20 +45,12 @@ public class ClaimList {
     @Nullable
     public Claim get(UUID uuid, String name) {
         ArrayList<Claim> claims = claimsByUUID.get(uuid);
-        for (Claim claim : claims) {
-            if (claim.getName().equals(name)) {
-                return claim;
+        if (claims != null) {
+            for (Claim claim : claims) {
+                if (claim.getName().equals(name)) {
+                    return claim;
+                }
             }
-/*            if (claim.isChild) {
-                String subzoneName = ClaimUtil.getParentClaim(claim).name + "." + claim.name;
-                if (subzoneName.equals(name)) {
-                    return claim;
-                }
-            } else {
-                if (claim.name.equals(name)) {
-                    return claim;
-                }
-            }*/
         }
         return null;
     }

@@ -52,7 +52,7 @@ public class InfoCommand {
         text.append(newInfoLine("Owner",
                 owner != null && claim.customOwnerName == null ? new LiteralText(owner.getName()).formatted(Formatting.GOLD) :
                         claim.customOwnerName != null ? new LiteralText(claim.customOwnerName).formatted(Formatting.GOLD) :
-                                new LiteralText(claim.claimBlockOwner == null ? "No Owner" : claim.claimBlockOwner.toString()).formatted(Formatting.RED).formatted(Formatting.ITALIC)));
+                                new LiteralText(claim.claimBlockOwner.toString()).formatted(Formatting.RED).formatted(Formatting.ITALIC).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, claim.claimBlockOwner.toString())))));
         text.append(newInfoLine("Size", new LiteralText(size.getX() + (claim.is2d() ? "x" : ("x" + size.getY() + "x")) + size.getZ()).formatted(Formatting.GREEN)));
 
 

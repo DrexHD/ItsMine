@@ -15,7 +15,7 @@ public class InvertedMap extends PermissionMap {
 
     @Override
     public boolean isPermissionSet(String permission) {
-        return permissions.containsKey(permission);
+        return true;
     }
 
     @Override
