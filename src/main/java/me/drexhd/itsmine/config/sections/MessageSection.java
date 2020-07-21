@@ -109,7 +109,7 @@ public class MessageSection {
     public String permissionReset = "&ePermission &6%permission% &efor &6%player% &ein &6%claim% &ehas been &6reset";
 
     @Setting(value = "flagSet", comment = "Variables: %flag% %value% %claim%")
-    public String flagSet = "&eSet Flag &6%flag% &eto %value%";
+    public String flagSet = "&eSet Flag &6%flag% &ein &6%claim% &eto %value%";
 
     @Setting(value = "flagQuery", comment = "Variables: %flag% %value% %claim%")
     public String flagQuery = "&eFlag &6%flag% &eis set to %value% &ein &6%claim%";

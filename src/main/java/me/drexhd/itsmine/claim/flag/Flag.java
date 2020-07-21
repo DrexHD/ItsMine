@@ -7,7 +7,8 @@ public enum Flag {
     EXPLOSION_DESTRUCTION("explosion_destruction", false),
     MOB_SPAWNING("mob_spawn", false),
     FLUID_CROSSES_BORDERS("fluid_crosses_borders", false),
-    ENTER_SOUND("enter_sound", false);
+    ENTER_SOUND("enter_sound", false),
+    FROST_WALKER("frost_walker", false);
 
     private String id;
     private boolean defaultValue;
