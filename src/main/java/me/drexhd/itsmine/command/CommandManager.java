@@ -2,52 +2,94 @@ package me.drexhd.itsmine.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import me.drexhd.itsmine.command.admin.AdminCommand;
-import me.drexhd.itsmine.command.subzone.SubzoneCommand;
+import me.drexhd.itsmine.command.updated.Admin;
+import me.drexhd.itsmine.command.updated.Other;
+import me.drexhd.itsmine.command.updated.Subzone;
 import net.minecraft.server.command.ServerCommandSource;
 
-import static me.drexhd.itsmine.util.ArgumentUtil.getClaims;
+import java.util.ArrayList;
 
 
 public class CommandManager {
 
     public static CommandDispatcher<ServerCommandSource> dispatcher;
+    private static ArrayList<Command> commands = new ArrayList<>();
 
 
     public static void register() {
         LiteralArgumentBuilder<ServerCommandSource> main = LiteralArgumentBuilder.literal("itsmine");
         LiteralArgumentBuilder<ServerCommandSource> alias = LiteralArgumentBuilder.literal("claim");
-        register(main, dispatcher);
-        register(alias, dispatcher);
+        addCommand(new me.drexhd.itsmine.command.updated.BanCommand("ban", true));
+        addCommand(new me.drexhd.itsmine.command.updated.BanCommand("unban", false));
+        addCommand(new me.drexhd.itsmine.command.updated.BannedCommand("banned"));
+        addCommand(new me.drexhd.itsmine.command.updated.BlockCommand("blocks"));
+        addCommand(new me.drexhd.itsmine.command.updated.CreateCommand("create"));
+        addCommand(new me.drexhd.itsmine.command.updated.ExpandCommand("expand", true));
+        addCommand(new me.drexhd.itsmine.command.updated.ExpandCommand("shrink", false));
+        addCommand(new me.drexhd.itsmine.command.updated.FlagCommand("flags"));
+        addCommand(new me.drexhd.itsmine.command.updated.FlyCommand("fly"));
+        addCommand(new me.drexhd.itsmine.command.updated.HelpCommand("help"));
+        addCommand(new me.drexhd.itsmine.command.updated.InfoCommand("info"));
+        addCommand(new me.drexhd.itsmine.command.updated.ListCommand("list"));
+        addCommand(new me.drexhd.itsmine.command.updated.MessageCommand("message"));
+        addCommand(new me.drexhd.itsmine.command.updated.PermissionCommand("permissions"));
+        addCommand(new me.drexhd.itsmine.command.updated.RemoveCommand("remove"));
+        addCommand(new me.drexhd.itsmine.command.updated.RenameCommand("rename"));
+        addCommand(new me.drexhd.itsmine.command.updated.RentableCommand("rentable"));
+        addCommand(new me.drexhd.itsmine.command.updated.RentCommand("rent"));
+        addCommand(new me.drexhd.itsmine.command.updated.RevenueCommand("revenue"));
+        addCommand(new me.drexhd.itsmine.command.updated.ShowCommand("show", true));
+        addCommand(new me.drexhd.itsmine.command.updated.ShowCommand("hide", false));
+        addCommand(new me.drexhd.itsmine.command.updated.StickCommand("stick"));
+        addCommand(new me.drexhd.itsmine.command.updated.TrustCommand("trust", true));
+        addCommand(new me.drexhd.itsmine.command.updated.TrustCommand("distrust", false));
+        addCommand(new me.drexhd.itsmine.command.updated.TrustedCommand("trusted"));
+        register(main);
+        register(alias);
         dispatcher.register(main);
         dispatcher.register(alias);
-    }
+//        register(main, dispatcher);
+//        register(alias, dispatcher);
 
 
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, CommandDispatcher dispatcher) {
-        AdminCommand.register(command, dispatcher);
-        BlockCommand.register(command);
-        CreateCommand.register(command);
-        ClaimCommand.register(command, dispatcher);
-        ExpandCommand.register(command, false);
-        FlyCommand.register(command);
-        HelpCommand.register(command);
-        InfoCommand.register(command, getClaims(), false);
-        ListCommand.register(command);
-        MessageCommand.register(command, false, getClaims());
-        PermissionCommand.register(command, false, getClaims());
-        RemoveCommand.register(command, getClaims(), false);
-        RenameCommand.register(command, false);
-        RentableCommand.register(command, getClaims());
-        RentCommand.register(command, getClaims());
-        RevenueCommand.register(command, getClaims());
-        FlagCommand.register(command, false, getClaims());
-        ShowCommand.register(command);
-        StickCommand.register(command);
-        SubzoneCommand.register(command, dispatcher, false);
-        TransferCommand.register(command);
-        TrustCommand.register(command, dispatcher, getClaims(), false);
-        TrustedCommand.register(command, false);
     }
+
+    public static void addCommand(Command command) {
+        commands.add(command);
+    }
+
+    public static void register(LiteralArgumentBuilder<ServerCommandSource> literal) {
+        LiteralArgumentBuilder<ServerCommandSource> admin = LiteralArgumentBuilder.literal("admin");
+        LiteralArgumentBuilder<ServerCommandSource> other = LiteralArgumentBuilder.literal("other");
+        LiteralArgumentBuilder<ServerCommandSource> subzone = LiteralArgumentBuilder.literal("subzone");
+        for (Command command : commands) {
+            command.admin(false);
+            command.others(false);
+            command.register(literal);
+            if (command instanceof Admin) {
+                Command cmd = command.copy();
+                cmd.admin(true);
+                cmd.others(true);
+                cmd.register(admin);
+            }
+            if (command instanceof Other) {
+                Command cmd = command.copy();
+                cmd.admin(false);
+                cmd.others(true);
+                cmd.register(other);
+            }
+            if (command instanceof Subzone) {
+                Command cmd = command.copy();
+                cmd.admin(false);
+                cmd.others(false);
+                cmd.subzones(true);
+                cmd.register(subzone);
+            }
+        }
+        literal.then(admin);
+        literal.then(other);
+        literal.then(subzone);
+    }
+
 
 }

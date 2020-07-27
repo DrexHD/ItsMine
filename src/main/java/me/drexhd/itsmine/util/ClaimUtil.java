@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ClaimUtil {
@@ -112,4 +113,14 @@ public class ClaimUtil {
         }
     }
 
+    public static int blocksLeft(ServerCommandSource source) throws CommandSyntaxException {
+        return blocksLeft(source, source.getPlayer().getUuid());
+    }
+
+
+        public static int blocksLeft(ServerCommandSource source, UUID uuid) throws CommandSyntaxException {
+        int blocks = ClaimManager.INSTANCE.getClaimBlocks(uuid);
+        source.sendFeedback(new LiteralText((source.getPlayer().getGameProfile().getId().equals(uuid) ? "You have " : "They have ") + blocks + " blocks left").formatted(Formatting.YELLOW), false);
+        return 1;
+    }
 }

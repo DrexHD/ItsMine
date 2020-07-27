@@ -1,11 +1,12 @@
-package me.drexhd.itsmine.command;
+package me.drexhd.itsmine.command.updated;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import me.drexhd.itsmine.util.ChatColor;
-import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.Messages;
+import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.command.Command;
+import me.drexhd.itsmine.util.ChatColor;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -13,15 +14,24 @@ import net.minecraft.util.Formatting;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static me.drexhd.itsmine.util.ArgumentUtil.getHelpId;
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
-public class HelpCommand {
+public class HelpCommand extends Command {
 
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+    public HelpCommand(String literal) {
+        super(literal);
+    }
+
+    @Override
+    public Command copy() {
+        return new HelpCommand(literal);
+    }
+
+    @Override
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+
         command.executes((context) -> sendPage(context.getSource(), Messages.GET_STARTED, 1, "Get Started", "/claim help getStarted %page%"));
 
-        LiteralArgumentBuilder<ServerCommandSource> help = literal("help");
-        help.executes((context) -> sendPage(context.getSource(), Messages.HELP, 1, "Its Mine!", "/claim help commands %page%"));
+        literal().executes((context) -> sendPage(context.getSource(), Messages.HELP, 1, "Its Mine!", "/claim help commands %page%"));
 
         RequiredArgumentBuilder<ServerCommandSource, String> id = getHelpId();
         RequiredArgumentBuilder<ServerCommandSource, Integer> page = argument("page", IntegerArgumentType.integer(1));
@@ -39,8 +49,8 @@ public class HelpCommand {
         });
 
         id.then(page);
-        help.then(id);
-        command.then(help);
+        literal().then(id);
+        command.then(literal());
     }
 
     public static int sendPage(ServerCommandSource source, Text[] text, int page, String title, String command) {
@@ -96,6 +106,5 @@ public class HelpCommand {
         source.sendFeedback(header, false);
         return 1;
     }
-
 
 }

@@ -3,6 +3,7 @@ package me.drexhd.itsmine;
 import me.drexhd.itsmine.claim.Claim;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.dimension.DimensionType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ClaimList {
     private HashMap<UUID, ArrayList<Claim>> claimsByUUID = new HashMap<>();
 
 
-    /*This map stores a list of claims sorted by chunkPos (the center chunk of each region), claims */
+    //This map stores a list of claims sorted by chunkPos (the center chunk of each region), claims
     private HashMap<Region, ArrayList<Claim>> claimsByRegion = new HashMap<>();
 
     public ArrayList<Claim> get() {
@@ -25,14 +26,26 @@ public class ClaimList {
     }
 
     @Nullable
-    public Claim get(int x, int y, int z, DimensionType dimension) {
+    public Claim get(int x, int y, int z, @NotNull DimensionType dimension) {
         BlockPos pos = new BlockPos(x, y, z);
-        ArrayList<Claim> claims = claimsByRegion.get(Region.get(x, z));
+        Region region = Region.get(x, z);
+        ArrayList<Claim> claims;
+        if (claimsByRegion.containsKey(region)) {
+            claims =
+                    claimsByRegion
+                            .get(
+                                    region);
+
+        } else {
+            return null;
+        }
         if (claims == null) return null;
         for (Claim claim : claims) {
-            if (claim.includesPosition(pos) && claim.dimension.equals(dimension)) {
+            if (claim.includesPosition(pos) &&
+                    claim.dimension.equals(dimension)) {
                 for (Claim subzone : claim.subzones) {
-                    if (subzone.dimension.equals(dimension) && subzone.includesPosition(pos)) {
+                    if (subzone.dimension.equals(dimension) &&
+                            subzone.includesPosition(pos)) {
                         return subzone;
                     }
                 }
@@ -64,19 +77,23 @@ public class ClaimList {
         return claimsByUUID.keySet();
     }
 
-
     public void remove(Claim claim) {
-/*        HashMap<Region, ArrayList<Claim>> claimsByRegionCopy = (HashMap<Region, ArrayList<Claim>>) claimsByRegion.clone();
-        for (Map.Entry<Region, ArrayList<Claim>> entry : claimsByRegion.entrySet()) {
-            for (Claim claimEntry : entry.getValue()) {
-                if (claim.equals(claimEntry)) {
-                    ArrayList<Claim> claimList = entry.getValue();
-                    claimList.remove(claimEntry);
-                    claimsByRegionCopy.put(entry.getKey(), claimList);
-                }
-            }
+        ArrayList<Claim> temp = new ArrayList<>();
+        for (Claim c : claims) {
+            if (!claim.equals(c)) temp.add(c);
         }
-        claimsByRegion = claimsByRegionCopy;*/
+        claims = new ArrayList<>();
+        claimsByUUID = new HashMap<>();
+        claimsByRegion = new HashMap<>();
+
+        for (Claim c1 : temp) {
+            add(c1);
+        }
+
+    }
+
+
+/*    public void remove(Claim claim) {
         Region regionA = Region.get(claim.min.getX(), claim.min.getZ());
         Region regionB = Region.get(claim.min.getX(), claim.max.getZ());
         Region regionC = Region.get(claim.max.getX(), claim.min.getZ());
@@ -97,7 +114,7 @@ public class ClaimList {
         ArrayList<Claim> claims = claimsByUUID.get(claim.claimBlockOwner);
         claims.remove(claim);
         claimsByUUID.put(claim.claimBlockOwner, claims);
-    }
+    }*/
 
     public boolean add(Claim claim) {
         /*Do not add if the claim already exists*/

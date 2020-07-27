@@ -1,51 +1,47 @@
-package me.drexhd.itsmine.command;
+package me.drexhd.itsmine.command.updated;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ClaimShower;
 import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.command.Command;
 import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.PermissionUtil;
 import me.drexhd.itsmine.util.ShowerUtil;
-import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static me.drexhd.itsmine.util.ShowerUtil.silentHideShow;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
-public class RemoveCommand {
+public class RemoveCommand extends Command implements Admin, Subzone {
 
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
-        LiteralArgumentBuilder<ServerCommandSource> delete = literal("remove");
-        LiteralArgumentBuilder<ServerCommandSource> confirm = literal("confirm");
-        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
-
-        confirm.executes(context -> delete(context, admin));
-        claim.executes(context -> requestDelete(context, admin));
-        claim.then(confirm);
-        if (admin) {
-            claimOwner.then(claim);
-            delete.then(claimOwner);
-        } else {
-            delete.then(claim);
-        }
-        command.then(delete);
+    public RemoveCommand(String literal) {
+        super(literal);
     }
 
-    private static int requestDelete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
+    @Override
+    public Command copy() {
+        return new RemoveCommand(literal);
+    }
+
+    @Override
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+        LiteralArgumentBuilder<ServerCommandSource> confirm = literal("confirm");
+
+        confirm.executes(context -> delete(context));
+        literal().then(thenClaim(confirm));
+        command.then(literal());
+    }
+    @Override
+    public int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
-        ClaimUtil.validateClaim(claim);
+        Claim claim = getClaim(context);
         if (claim.claimBlockOwner != null && !claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {
             if (admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
                 source.sendFeedback(new LiteralText("WARNING: This is not your claim...").formatted(Formatting.DARK_RED).formatted(Formatting.BOLD), false);
@@ -54,16 +50,18 @@ public class RemoveCommand {
                 return 0;
             }
         }
-        source.sendFeedback(new LiteralText("").append(new LiteralText("Are you sure you want to delete the claim \"" + claim.name + "\"? ").formatted(Formatting.GOLD))
-                .append(new LiteralText("[I'M SURE]").styled(style -> style.withColor(Formatting.DARK_RED).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (admin ? "/claim admin" : "/claim") + " remove " + claim.name + " confirm")))), false);
+        source.sendFeedback(new LiteralText("").append(new LiteralText("Are you sure you want to delete the claim \"" + claim.name + "\"? ")
+                .formatted(Formatting.GOLD))
+                .append(new LiteralText("[I'M SURE]")
+                .styled(style -> style.withColor(Formatting.DARK_RED).withBold(true)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, (admin ? "/claim admin" : "/claim") + " remove " + claim.name + " confirm")))), false);
         return 0;
     }
 
-    private static int delete(CommandContext<ServerCommandSource> context, boolean admin) throws CommandSyntaxException {
+    private int delete(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        Claim claim = ClaimManager.INSTANCE.getClaim(context, getString(context, "claim"));
+        Claim claim = getClaim(context);
         ServerWorld world = source.getWorld();
-        ClaimUtil.validateClaim(claim);
         if (!claim.claimBlockOwner.equals(source.getPlayer().getUuid())) {
             if (admin && ItsMine.permissions().hasPermission(source, PermissionUtil.Command.ADMIN_MODIFY, 2)) {
                 source.sendFeedback(new LiteralText("Deleting a claim belonging to somebody else").formatted(Formatting.DARK_RED).formatted(Formatting.BOLD), false);

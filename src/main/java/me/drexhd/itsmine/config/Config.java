@@ -3,6 +3,7 @@ package me.drexhd.itsmine.config;
 import me.drexhd.itsmine.config.sections.DefaultClaimBlockSection;
 import me.drexhd.itsmine.config.sections.MessageSection;
 import me.drexhd.itsmine.config.sections.RentSection;
+import me.drexhd.itsmine.config.sections.SpawnSection;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
@@ -33,10 +34,18 @@ public class Config {
     @Setting(value = "rent")
     private RentSection rentSection = new RentSection();
 
+    @Setting(value = "banLocation", comment = "The location to where people get teleported, if they are banned in a claim")
+    private SpawnSection spawnSection = new SpawnSection();
+
 
     public MessageSection message(){
         return messageSection;
     }
+
+    public SpawnSection spawnSection(){
+        return spawnSection;
+    }
+
 
     public DefaultClaimBlockSection claimBlock(){
         return defaultClaimBlockSection;

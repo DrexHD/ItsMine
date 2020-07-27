@@ -1,14 +1,14 @@
-package me.drexhd.itsmine.command;
+package me.drexhd.itsmine.command.updated;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.claim.Claim;
-import me.drexhd.itsmine.util.ArgumentUtil;
+import me.drexhd.itsmine.command.Command;
 import me.drexhd.itsmine.util.ClaimUtil;
-import me.drexhd.itsmine.util.DirectionUtil;
 import me.drexhd.itsmine.util.ShowerUtil;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -19,63 +19,28 @@ import net.minecraft.util.math.Direction;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
-public class ExpandCommand {
+public class ExpandCommand extends Command implements Admin, Other, Subzone {
 
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, boolean admin) {
-        {
-            LiteralArgumentBuilder<ServerCommandSource> expand = literal("expand");
-            RequiredArgumentBuilder<ServerCommandSource, Integer> amount = argument("distance", IntegerArgumentType.integer(1, Integer.MAX_VALUE));
-            RequiredArgumentBuilder<ServerCommandSource, String> direction = ArgumentUtil.getDirections();
+    private boolean expand;
 
-            direction.executes(context -> expand(
-                    ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension()),
-                    IntegerArgumentType.getInteger(context, "distance"),
-                    DirectionUtil.directionByName(getString(context, "direction")),
-                    context.getSource(),
-                    admin
-            ));
+    public ExpandCommand(String literal, boolean expand) {
+        super(literal);
+        this.expand = expand;
+    }
 
-            amount.executes(context -> expand(
-                    ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension()),
-                    IntegerArgumentType.getInteger(context, "distance"),
-                    Direction.getEntityFacingOrder(context.getSource().getPlayer())[0],
-                    context.getSource(),
-                    admin
-            ));
+    @Override
+    public Command copy() {
+        return new ExpandCommand(literal, expand);
+    }
 
-            amount.then(direction);
-            expand.then(amount);
-            command.then(expand);
-        }
-        {
-            LiteralArgumentBuilder<ServerCommandSource> shrink = literal("shrink");
-            RequiredArgumentBuilder<ServerCommandSource, Integer> amount = argument("distance", IntegerArgumentType.integer(1, Integer.MAX_VALUE));
-            RequiredArgumentBuilder<ServerCommandSource, String> direction = ArgumentUtil.getDirections();
-
-            direction.executes(context -> expand(
-                    ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension()),
-                    -IntegerArgumentType.getInteger(context, "distance"),
-                    DirectionUtil.directionByName(getString(context, "direction")),
-                    context.getSource(),
-                    admin
-            ));
-
-            amount.executes(context -> expand(
-                    ClaimManager.INSTANCE.getClaimAt(context.getSource().getPlayer().getBlockPos(), context.getSource().getWorld().getDimension()),
-                    -IntegerArgumentType.getInteger(context, "distance"),
-                    Direction.getEntityFacingOrder(context.getSource().getPlayer())[0],
-                    context.getSource(),
-                    admin
-            ));
-
-            amount.then(direction);
-            shrink.then(amount);
-            command.then(shrink);
-        }
+    @Override
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+        RequiredArgumentBuilder<ServerCommandSource, Integer> amount = argument("distance", IntegerArgumentType.integer(1, 1024));
+        amount.executes(this::expand);
+        literal().then(amount);
+        command.then(literal());
     }
 
     private static void undoExpand(Claim claim, Direction direction, int amount) {
@@ -83,19 +48,16 @@ public class ExpandCommand {
         else claim.shrink(direction, amount);
     }
 
-    public static int expand(Claim claim, int amount, Direction direction, ServerCommandSource source, boolean admin) throws CommandSyntaxException {
+    public int expand(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
         UUID ownerID = source.getPlayer().getGameProfile().getId();
-        if (claim == null) {
-            source.sendFeedback(new LiteralText("That claim does not exist").formatted(Formatting.RED), false);
-            return 0;
-        }
-        if (direction == null) {
-            source.sendFeedback(new LiteralText("That is not a valid direction").formatted(Formatting.RED), false);
-            return 0;
-        }
+        Claim claim = getClaimAt(context);
+        int amount = IntegerArgumentType.getInteger(context, "distance");
+        if(!expand) amount *= -1;
+        Direction direction = Direction.getEntityFacingOrder(source.getPlayer())[0];
         if (!claim.hasPermission(ownerID, "modify", "size")) {
             source.sendFeedback(new LiteralText("You do not have border change permissions in that claim").formatted(Formatting.RED), false);
-            if (!admin) return 0;
+            return 0;
         }
         int oldArea = claim.getArea();
 
@@ -106,7 +68,7 @@ public class ExpandCommand {
             claim.shrink(direction, -amount);
         }
 
-        if (!claim.canShrinkWithoutHittingOtherSide(new BlockPos(direction.getOffsetX() * amount, direction.getOffsetY() * amount, direction.getOffsetZ() * amount))) {
+        if (!claim.canShrink(new BlockPos(direction.getOffsetX() * amount, direction.getOffsetY() * amount, direction.getOffsetZ() * amount))) {
             source.sendFeedback(new LiteralText("You can't shrink your claim that far. It would pass its opposite wall.").formatted(Formatting.RED), false);
             undoExpand(claim, direction, amount);
             return 0;
@@ -114,36 +76,37 @@ public class ExpandCommand {
 
         if (!claim.isChild) {
             if (ClaimManager.INSTANCE.wouldIntersect(claim)) {
-                undoExpand(claim, direction, amount);
                 source.sendFeedback(new LiteralText("Expansion would result in hitting another claim").formatted(Formatting.RED), false);
+                undoExpand(claim, direction, amount);
                 return 0;
             }
 
             //Check if shrinking would reset a subzone to be outside of its parent claim
-            AtomicBoolean returnValue = new AtomicBoolean();
-            returnValue.set(false);
+            AtomicBoolean returnVal = new AtomicBoolean();
+            returnVal.set(false);
+            int finalAmount = amount;
             claim.subzones.forEach(subzone -> {
                 if (!subzone.isInside(claim)) {
-                    undoExpand(claim, direction, amount);
+                    undoExpand(claim, direction, finalAmount);
                     source.sendFeedback(new LiteralText("Shrinking would result in " + subzone.name + " being outside of " + claim.name).formatted(Formatting.RED), true);
-                    returnValue.set(true);
+                    returnVal.set(true);
                 }
             });
-            if (returnValue.get()) return 0;
+            if (returnVal.get()) return 0;
 
             int newArea = claim.getArea() - oldArea;
             if (!admin && claim.claimBlockOwner != null && ClaimManager.INSTANCE.getClaimBlocks(ownerID) < newArea) {
-                undoExpand(claim, direction, amount);
                 source.sendFeedback(new LiteralText("You don't have enough claim blocks. You have " + ClaimManager.INSTANCE.getClaimBlocks(ownerID) + ", you need " + newArea + "(" + (newArea - ClaimManager.INSTANCE.getClaimBlocks(ownerID)) + " more)").formatted(Formatting.RED), false);
-                BlockCommand.blocksLeft(source);
+                undoExpand(claim, direction, amount);
+                ClaimUtil.blocksLeft(source);
                 return 0;
             } else if (claim.max.getX() - claim.min.getX() > 1024 || claim.max.getZ() - claim.min.getZ() > 1024) {
                 undoExpand(claim, direction, amount);
-                source.sendFeedback(new LiteralText("This operation would result in exceeding the claim length limit (1024)").formatted(Formatting.RED), false);
+                source.sendFeedback(new LiteralText("This operation would result in exceeding the maximum claim length limit (1024)").formatted(Formatting.RED), false);
             } else {
                 if (!admin && claim.claimBlockOwner != null) ClaimManager.INSTANCE.useClaimBlocks(ownerID, newArea);
                 source.sendFeedback(new LiteralText("Your claim was " + (amount > 0 ? "expanded" : "shrunk") + " by " + (amount < 0 ? -amount : amount) + (amount == 1 ? " block " : " blocks ") + direction.getName()).formatted(Formatting.GREEN), false);
-                BlockCommand.blocksLeft(source);
+                ClaimUtil.blocksLeft(source);
                 undoExpand(claim, direction, amount);
                 ShowerUtil.update(claim, source.getWorld(), true);
                 ClaimManager.INSTANCE.updateClaim(claim);

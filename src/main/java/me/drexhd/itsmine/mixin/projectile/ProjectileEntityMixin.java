@@ -7,8 +7,8 @@ import me.drexhd.itsmine.util.EntityUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -42,15 +42,14 @@ public abstract class ProjectileEntityMixin {
             claim = ClaimManager.INSTANCE.getClaimAt(pos, dimension);
         }
 
-        if (this.getOwner() == null ||
-                claim == null) {
+        if (this.getOwner() == null || claim == null) {
             this.onEntityHit(entityHitResult);
         } else if (this.getOwner().getUuid() != null &&
                 EntityUtil.canDamage(this.getOwner().getUuid(), claim, entity)) {
             this.onEntityHit(entityHitResult);
         } else {
-            if (this.getOwner() instanceof PlayerEntity) {
-                MessageUtil.sendTranslatableMessage((PlayerEntity) this.getOwner(), ItsMineConfig.main().message().attackEntity);
+            if (this.getOwner() instanceof ServerPlayerEntity) {
+                MessageUtil.sendTranslatableMessage((ServerPlayerEntity) this.getOwner(), ItsMineConfig.main().message().attackEntity);
                 if (projectileEntity.getType() == EntityType.ARROW) {
                     projectileEntity.kill();
                 }

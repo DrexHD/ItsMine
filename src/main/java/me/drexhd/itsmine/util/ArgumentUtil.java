@@ -9,7 +9,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.drexhd.itsmine.ClaimManager;
-import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
@@ -84,7 +83,7 @@ public class ArgumentUtil {
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
         if (current != null) names.add(current.getName());
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
-            if (claim != null && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")) ) {
+            if (claim != null/* && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")) */) {
                 names.add(claim.getName());
             }
         }
@@ -112,7 +111,7 @@ public class ArgumentUtil {
         Claim current = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
         if (current != null) names.add(current.getName());
         for (Claim claim : ClaimManager.INSTANCE.getPlayerClaims(gameProfile.getId())) {
-            if (claim != null && claim.isChild && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")) ) {
+            if (claim != null && claim.isChild/* && (gameProfile.getId().equals(player.getUuid()) || ItsMine.permissions().hasPermission(player.getUuid(), "itsmine.admin")))*/) {
                 names.add(claim.getName());
             }
         }

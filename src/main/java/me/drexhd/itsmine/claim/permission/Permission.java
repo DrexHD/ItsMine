@@ -102,6 +102,8 @@ public enum Permission {
             add("flags");
             add("permissions");
             add("properties");
+            add("rent");
+            add("ban");
             add("subzone");
         }});
 

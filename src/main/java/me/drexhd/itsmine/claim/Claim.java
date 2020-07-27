@@ -36,6 +36,7 @@ public class Claim {
     public FlagManager flagManager = new FlagManager();
     public PermissionManager permissionManager = new PermissionManager();
     public RentManager rentManager = new RentManager();
+    public BanManager banManager = new BanManager();
     public UUID claimBlockOwner = new UUID(0, 0);
     public String customOwnerName, enterMessage, leaveMessage;
     public boolean isChild = false;
@@ -155,19 +156,20 @@ public class Claim {
 
     public boolean isPermissionDenied(UUID player, String parent, @Nullable String child) {
         String permission = child == null ? parent : parent + "." + child;
-        MessageUtil.debug(this.name + ": Checking " + permission + " for " + player + " (isPermissionDenied)");
         if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
             return false;
         }
-        if (claimBlockOwner != null && claimBlockOwner.equals(player) || ClaimManager.INSTANCE.ignoringClaims.contains(player)) return false;
-        return permissionManager.isPermissionDenied(player, parent, child);
+        if (claimBlockOwner != null && claimBlockOwner.equals(player) || ClaimManager.INSTANCE.ignoringClaims.contains(player))
+            return false;
+        return permissionManager.isPermissionDenied(player, permission);
     }
 
     public boolean canModifySettings(UUID uuid) {
         return hasPermission(uuid, "modify", "permissions");
     }
+
 
     public void addSubzone(Claim claim) {
         subzones.add(claim);
@@ -217,7 +219,7 @@ public class Claim {
         }
     }
 
-    public boolean canShrinkWithoutHittingOtherSide(BlockPos modifier) {
+    public boolean canShrink(BlockPos modifier) {
         if (modifier.getX() < 0) {
             if (min.getX() - modifier.getX() > max.getX()) return false;
         } else {
@@ -279,6 +281,7 @@ public class Claim {
         {
             tag.put("flags", flagManager.toNBT());
             tag.put("permissions", permissionManager.toNBT());
+            tag.put("bans", banManager.toNBT());
 
         }
         {
@@ -329,38 +332,28 @@ public class Claim {
                 rentManager = new RentManager();
                 rentManager.fromTag(rent);
             }
-/*            {
-                CompoundTag rented = rent1.getCompound("rented");
-                if (containsUUID(rented, "tenant")) rentManager.setTenant(getUUID(rented, "tenant"));
-                if (rented.contains("rentedUntil")) rentManager.setUntil(rented.getInt("rentedUntil"));
-            }
-            {
-                CompoundTag rentable = rent1.getCompound("rentable");
-                CompoundTag currency = rentable.getCompound("currency");
-                if (rentable.contains("rentable")) rentManager.setRentable(rentable.getBoolean("rentable"));
-                if (currency != null) rentManager.setCurrency(ItemStack.fromTag(currency));
-                if (rentable.contains("rentTime")) rentManager.setRentAbleTime(rentable.getInt("rentTime"));
-                if (rentable.contains("maxrentTime")) rentManager.setMax(rentable.getInt("maxrentTime"));
-            }
-            {
-                CompoundTag revenue = rent1.getCompound("revenue");
-                if (!revenue.isEmpty()) {
-                    for (int i = 1; i <= revenue.getSize(); i++) {
-                        CompoundTag revenueTag = revenue.getCompound(String.valueOf(i));
-                        rentManager.addRevenue(ItemStack.fromTag(revenueTag));
-                    }
-                }
-            }*/
         }
         {
             CompoundTag flags = tag.getCompound("flags");
-            if (!flags.isEmpty()) {
-                flagManager = new FlagManager();
-                flagManager.fromNBT(flags);
-            }
+            flagManager = new FlagManager();
+            flagManager.fromNBT(flags);
 
+            CompoundTag permission = tag.getCompound("permissions");
             permissionManager = new PermissionManager();
-            permissionManager.fromNBT(tag.getCompound("permissions"));
+            permissionManager.fromNBT(permission);
+
+/*            CompoundTag ban = tag.getCompound("bans");
+            System.out.println(ban);
+            for (int i = 0; i < 50; i++) {
+                ListTag bans = tag.getList("bans", i);
+                System.out.println("i: " + i);
+                System.out.println("bans: " + bans);
+                System.out.println("banSize: " + bans.size());
+            }*/
+            ListTag bans = tag.getList("bans", 8);
+            banManager = new BanManager();
+            banManager.fromNBT(bans);
+
             claimBlockOwner = uuid;
 
         }

@@ -34,10 +34,10 @@ public class MessageSection {
     public String attackEntity = "&cSorry but you can't attack this entity!";
 
     @Setting(value = "enterDefault", comment = "Variables: %claim% %player%")
-    public String enterDefault = "&eNow entering claim &6%claim%";
+    public String enterDefault = "&eNow entering &6%claim%";
 
     @Setting(value = "leaveDefault", comment = "Variables: %claim% %player%")
-    public String leaveDefault = "&eNow leaving claim &6%claim%";
+    public String leaveDefault = "&eNow leaving &6%claim%";
 
     @Setting(value = "cantEnter")
     public String cantEnter = "&cSorry but you don't have permission to enter this claim!";
@@ -60,8 +60,8 @@ public class MessageSection {
     @Setting(value = "toggleRent")
     public String toggleRent = "&eRenting for &6%claim% &ehas been %value%";
 
-    @Setting(value = "toggleRentError")
-    public String toggleRentError = "Can't enable rent for &6%claim%, because no values are set";
+    @Setting(value = "rentNoValues")
+    public String rentNoValues = "&eUse &6/claim rentable <claim> <item> <count> <rent> <max> &eto make a claim rentable\neg: &6/claim rentable House diamond 5 7d 28d";
 
     @Setting(value = "alreadyRented")
     public String alreadyRented = "&cThis claim is already rented!";
@@ -79,7 +79,7 @@ public class MessageSection {
     public String notEnough = "&cYou don't have enough %item% in your main hand";
 
     @Setting(value = "invalidRentTime")
-    public String invalidRentTime = "&cInvalid rent time &c&o(Maximum time has to be bigger and a multiple of minimum rent time)&c!";
+    public String invalidRentTime = "&cInvalid rent time (Maximum rent time has to be bigger than minimum)";
 
     @Setting(value = "invalidRentExtendTime1")
     public String invalidRentExtendTime1 = "&cInvalid rent time &c&o(Exceeds maximum rent time)&c!";

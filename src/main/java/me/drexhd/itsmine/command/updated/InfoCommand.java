@@ -1,63 +1,70 @@
-package me.drexhd.itsmine.command;
+package me.drexhd.itsmine.command.updated;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
-import me.drexhd.itsmine.util.ClaimUtil;
+import me.drexhd.itsmine.command.Command;
 import me.drexhd.itsmine.util.TimeUtil;
 import me.drexhd.itsmine.util.WorldUtil;
-import net.minecraft.command.arguments.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import java.util.UUID;
 
-public class InfoCommand {
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim, boolean admin) {
-        LiteralArgumentBuilder<ServerCommandSource> info = literal("info");
-        RequiredArgumentBuilder<ServerCommandSource, GameProfileArgumentType.GameProfileArgument> claimOwner = argument("claimOwner", GameProfileArgumentType.gameProfile())/*.suggests(PLAYERS_PROVIDER)*/;
-        info.executes(context -> info(context, ""));
-        claim.executes(context -> info(context, getString(context, "claim")));
-        if (admin) {
-            claimOwner.then(claim);
-            info.then(claimOwner);
-        } else {
-            info.then(claim);
-        }
-        command.then(info);
+public class InfoCommand extends Command implements Other{
+
+
+    public InfoCommand(String literal) {
+        super(literal);
+        this.suggestCurrent = true;
     }
 
-    private static int info(CommandContext<ServerCommandSource> context, String claimName) throws CommandSyntaxException {
+    @Override
+    public Command copy() {
+        return new InfoCommand(literal);
+    }
+
+    @Override
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+        literal().then(thenClaim());
+        literal().executes(this::execute);
+        command.then(literal());
+    }
+
+    @Override
+    public int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        Claim claim;
-        if (claimName.equals("")) claim = ClaimManager.INSTANCE.getClaimAt(new BlockPos(source.getPosition()), source.getWorld().getDimension());
-        else claim = ClaimManager.INSTANCE.getClaim(context, claimName);
-        ClaimUtil.validateClaim(claim);
-        GameProfile owner = claim.claimBlockOwner == null ? null : source.getMinecraftServer().getUserCache().getByUuid(claim.claimBlockOwner);
+        Claim claim = getClaim(context);
+        UUID ownerUUID = claim.claimBlockOwner;
+        String ownerName = "";
+        if (ownerUUID.equals(ClaimManager.serverUUID)) {
+            ownerName = "Server";
+        } else {
+            GameProfile owner = source.getMinecraftServer().getUserCache().getByUuid(ownerUUID);
+            if (owner != null && owner.isComplete()) {
+                ownerName = owner.getName();
+            }
+        }
         BlockPos size = claim.getSize();
 
         MutableText text = new LiteralText("\n");
-        text.append(new LiteralText("Claim Info: " + claim.name).formatted(Formatting.GOLD)).append(new LiteralText("\n"));
-        text.append(newInfoLine("Name", new LiteralText(claim.name).formatted(Formatting.WHITE)));
-        text.append(newInfoLine("Entities", new LiteralText(String.valueOf(claim.getEntities(source.getWorld()))).formatted(Formatting.AQUA)));
-        text.append(newInfoLine("Owner",
-                owner != null && claim.customOwnerName == null ? new LiteralText(owner.getName()).formatted(Formatting.GOLD) :
-                        claim.customOwnerName != null ? new LiteralText(claim.customOwnerName).formatted(Formatting.GOLD) :
-                                new LiteralText(claim.claimBlockOwner.toString()).formatted(Formatting.RED).formatted(Formatting.ITALIC).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, claim.claimBlockOwner.toString())))));
-        text.append(newInfoLine("Size", new LiteralText(size.getX() + (claim.is2d() ? "x" : ("x" + size.getY() + "x")) + size.getZ()).formatted(Formatting.GREEN)));
+        text.append(new LiteralText("Claim Info: " + claim.name).formatted(Formatting.GOLD))
+                .append(new LiteralText("\n"))
+                .append(newInfoLine("Name", new LiteralText(claim.name).formatted(Formatting.WHITE)))
+                .append(newInfoLine("Entities", new LiteralText(String.valueOf(claim.getEntities(source.getWorld()))).formatted(Formatting.AQUA)))
+                .append(newInfoLine("Owner", ownerName.equals("") ?
+                        new LiteralText(ownerUUID.toString()).formatted(Formatting.RED, Formatting.ITALIC).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, claim.claimBlockOwner.toString()))) :
+                        new LiteralText(ownerName).formatted(Formatting.GOLD)))
+                .append(newInfoLine("Size", new LiteralText(size.getX() + (claim.is2d() ? "x" : ("x" + size.getY() + "x")) + size.getZ()).formatted(Formatting.GREEN)))
+                .append(new LiteralText("").append(new LiteralText("* Flags:").formatted(Formatting.YELLOW))
+                        .append(Messages.Command.getFlags(claim)).append(new LiteralText("\n")));
 
-
-        text.append(new LiteralText("").append(new LiteralText("* Flags:").formatted(Formatting.YELLOW))
-                .append(Messages.Command.getFlags(claim)).append(new LiteralText("\n")));
         MutableText pos = new LiteralText("");
         Text min = newPosLine(claim.min, Formatting.AQUA, Formatting.DARK_AQUA);
         Text max = newPosLine(claim.max, Formatting.LIGHT_PURPLE, Formatting.DARK_PURPLE);
@@ -85,7 +92,8 @@ public class InfoCommand {
         return 1;
     }
 
-    private static MutableText newPosLine(BlockPos pos, Formatting form1, Formatting form2) {
+
+    private MutableText newPosLine(BlockPos pos, Formatting form1, Formatting form2) {
         return new LiteralText("")
                 .append(new LiteralText(String.valueOf(pos.getX())).formatted(form1))
                 .append(new LiteralText(" "))
@@ -94,7 +102,7 @@ public class InfoCommand {
                 .append(new LiteralText(String.valueOf(pos.getZ())).formatted(form1));
     }
 
-    private static MutableText newInfoLine(String title, Text... text) {
+    private MutableText newInfoLine(String title, Text... text) {
         MutableText message = new LiteralText("").append(new LiteralText("* " + title + ": ").formatted(Formatting.YELLOW));
         for (Text t : text) {
             message.append(t);

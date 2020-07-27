@@ -5,6 +5,7 @@ import me.drexhd.itsmine.Functions;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ChatColor;
+import me.drexhd.itsmine.util.ClaimUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.PlaySoundIdS2CPacket;
@@ -13,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -28,6 +30,7 @@ public abstract class EntityMixin {
     public World world;
     @Shadow
     public boolean removed;
+    public Vec3d pos;
     private Claim pclaim = null;
 
     @Shadow
@@ -40,6 +43,7 @@ public abstract class EntityMixin {
     public void doPrePosActions(double x, double y, double z, CallbackInfo ci) {
         if ((Object) this instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) (Object) this;
+            pos = this.getPos();
             if (player.getBlockPos() == null) return;
             pclaim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
         }
@@ -47,7 +51,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "setPos", at = @At("RETURN"))
     public void doPostPosActions(double x, double y, double z, CallbackInfo ci) {
-        if((Object) this instanceof PlayerEntity) {
+        if ((Object) this instanceof ServerPlayerEntity) {
             PlayerEntity player = (PlayerEntity) (Object) this;
             if (player.getBlockPos() == null) return;
             Claim claim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
@@ -58,8 +62,19 @@ public abstract class EntityMixin {
                     if (pclaim != null && claim == null) {
                         message = getFormattedEventMessage(player, pclaim, false);
                     } else if (claim != null) {
-                        message = getFormattedEventMessage(player, claim, true);
-                        if (claim.flagManager.hasFlag("enter_sound")) serverPlayerEntity.networkHandler.sendPacket(new PlaySoundIdS2CPacket(Registry.SOUND_EVENT.getId(SoundEvents.BLOCK_CONDUIT_ACTIVATE), SoundCategory.MASTER, this.getPos(), 2, 1.2F));
+                        if (ClaimUtil.getParentClaim(claim).banManager.isBanned(player.getUuid())) {
+                            if (pclaim != null && ClaimUtil.getParentClaim(pclaim).banManager.isBanned(player.getUuid())) {
+                                BlockPos loc = ItsMineConfig.main().spawnSection().getBlockPos();
+                                player.teleport(loc.getX(), loc.getY(), loc.getZ());
+                            } else {
+                                player.teleport(pos.x, pos.y, pos.z);
+                            }
+                            message = "&cYou can't enter this claim, because you've been banned from it.";
+                        } else {
+                            message = getFormattedEventMessage(player, claim, true);
+                            if (claim.flagManager.hasFlag("enter_sound"))
+                                serverPlayerEntity.networkHandler.sendPacket(new PlaySoundIdS2CPacket(Registry.SOUND_EVENT.getId(SoundEvents.BLOCK_CONDUIT_ACTIVATE), SoundCategory.MASTER, this.getPos(), 2, 1.2F));
+                        }
                     }
 
                     if (message != null && !message.equals("")) {
@@ -75,7 +90,8 @@ public abstract class EntityMixin {
             return "";
 
         String str = enter ? claim.enterMessage : claim.leaveMessage;
-        return ChatColor.translate(str == null ? (enter ? ItsMineConfig.main().message().enterDefault : ItsMineConfig.main().message().leaveDefault) : str).replace("%claim%", claim.name)
+        String claimName = claim.isChild ? ClaimUtil.getParentClaim(claim).name + "." + claim.name : claim.name;
+        return ChatColor.translate(str == null ? (enter ? ItsMineConfig.main().message().enterDefault : ItsMineConfig.main().message().leaveDefault) : str).replace("%claim%", claimName)
                 .replace("%player%", player.getName().asString());
     }
 
@@ -94,10 +110,10 @@ public abstract class EntityMixin {
             if (player instanceof ServerPlayerEntity) {
                 if (player.abilities.allowFlying &&
                         shouldChange(player) &&
-                            (!ClaimManager.INSTANCE.flyers.contains(player.getUuid()) ||
-                                    claim == null ||
-                                    !claim.hasPermission(player.getGameProfile().getId(), "flight", null) ||
-                                    !Functions.canFly((ServerPlayerEntity) player))
+                        (!ClaimManager.INSTANCE.flyers.contains(player.getUuid()) ||
+                                claim == null ||
+                                !claim.hasPermission(player.getGameProfile().getId(), "flight", null) ||
+                                !Functions.canFly((ServerPlayerEntity) player))
                 ) {
                     player.abilities.allowFlying = false;
                     player.abilities.flying = false;

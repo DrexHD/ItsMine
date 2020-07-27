@@ -1,13 +1,12 @@
-package me.drexhd.itsmine.command;
+package me.drexhd.itsmine.command.updated;
 
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
+import me.drexhd.itsmine.command.Command;
 import me.drexhd.itsmine.util.ItemUtil;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,35 +16,40 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+public class RevenueCommand extends Command {
 
-public class RevenueCommand {
-
-    public static void register(LiteralArgumentBuilder<ServerCommandSource> command, RequiredArgumentBuilder<ServerCommandSource, String> claim) {
-        LiteralArgumentBuilder<ServerCommandSource> revenue = literal("revenue");
-        RequiredArgumentBuilder<ServerCommandSource, Boolean> claimRevenue = argument("claimRevenue", BoolArgumentType.bool());
-        revenue.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaimAt(new BlockPos(context.getSource().getPosition()), context.getSource().getWorld().getDimension()), false));
-        revenue.requires(source -> ItsMine.permissions().hasPermission(source, "itsmine." + "rent", 2));
-        claim.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), false));
-        claimRevenue.executes(context -> revenue(context.getSource(), ClaimManager.INSTANCE.getClaim(context.getSource().getPlayer().getUuid(), getString(context, "claim")), true));
-        claim.then(claimRevenue);
-        revenue.then(claim);
-        command.then(revenue);
+    public RevenueCommand(String literal) {
+        super(literal);
     }
 
-    private static int revenue(ServerCommandSource source, Claim claim, boolean claimrevenue) throws CommandSyntaxException {
-        //Show subzones (so you can just claim everything in one place) maybe just all claims
-        if (claim == null) {
-            source.sendFeedback(Messages.INVALID_CLAIM, true);
-            return 0;
-        }
+    @Override
+    public Command copy() {
+        return new RevenueCommand(literal);
+    }
+
+    @Override
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+        LiteralArgumentBuilder<ServerCommandSource> confirm = LiteralArgumentBuilder.literal("confirm");
+        confirm.executes(context -> revenue(context, true));
+        literal().requires(source -> ItsMine.permissions().hasPermission(source, "itsmine." + "rent", 2));
+        literal().then(thenClaim(confirm));
+        command.then(literal());
+    }
+
+    @Override
+    public int execute(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        return revenue(context, false);
+    }
+
+    public int revenue(CommandContext<ServerCommandSource> context, boolean claimrevenue) throws CommandSyntaxException {
+        //TODO:
+        // Show subzones (so you can just claim everything in one place) maybe just all claims
+        Claim claim = getClaim(context);
+        ServerCommandSource source = context.getSource();
         if (!claim.claimBlockOwner.toString().equalsIgnoreCase(source.getPlayer().getUuid().toString())) {
             source.sendFeedback(Messages.NO_PERMISSION, true);
             return 0;
@@ -89,5 +93,4 @@ public class RevenueCommand {
             return 1;
         }
     }
-
 }

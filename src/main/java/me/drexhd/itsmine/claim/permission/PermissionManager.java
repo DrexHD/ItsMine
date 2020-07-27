@@ -16,13 +16,15 @@ public class PermissionManager {
     public Map<UUID, PermissionMap> playerPermissions = new HashMap<>();
 
     public boolean isPermissionSet(UUID player, String permission) {
-        return playerPermissions.get(player) != null && playerPermissions.get(player).isPermissionSet(permission);
+        if (permission != null) {
+            PermissionMap map = playerPermissions.get(player);
+            return map != null && map.isPermissionSet(permission);
+        }
+        return false;
     }
 
-    /** This method allows you to check if a permissions has been specifically disabled for a player
-    * */
-    public boolean isPermissionDenied(UUID player, String parent, String child) {
-        String permission = parent + "." + child;
+    //This method allows you to check if a permissions has been specifically denied for a player
+    public boolean isPermissionDenied(UUID player, String permission) {
         if (isPermissionSet(player, permission)) {
             return !playerPermissions.get(player).hasPermission(permission);
         } else {
@@ -42,10 +44,10 @@ public class PermissionManager {
 
     /**
      * @param parent the root permission node
-     * @param child the permission group node (maybe be null)
+     * @param child  the permission group node (maybe be null)
      * @param player uuid of the player who's permission you want to check
-    * @return true if the player has the specified permission, a parent permission or it is set in either default claim permissions or global claim permissions
-    * */
+     * @return true if the player has the specified permission, a parent permission or it is set in either default claim permissions or global claim permissions
+     */
     public boolean hasPermission(UUID player, String parent, @Nullable String child) {
         if (child == null) {
             if (isPermissionSet(player, parent)) {

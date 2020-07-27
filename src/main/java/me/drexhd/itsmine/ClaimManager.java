@@ -24,9 +24,10 @@ import java.util.*;
  * @author Indigo Amann
  */
 public class ClaimManager {
+    public static final GameProfile serverProfile = new GameProfile(new UUID(0, 0), "Server");
+    public static final UUID serverUUID = new UUID(0, 0);
     public static ClaimManager INSTANCE = null;
     public static MinecraftServer server;
-    public static final GameProfile serverProfile = new GameProfile(new UUID(0,0), "Server");
     public Map<PlayerEntity, Pair<BlockPos, BlockPos>> stickPositions = new HashMap<>();
     public List<UUID> ignoringClaims = new ArrayList<>();
     public List<UUID> flyers = new ArrayList<>();
@@ -132,7 +133,7 @@ public class ClaimManager {
 
     public boolean wouldSubzoneIntersect(Claim claim) {
         for (Claim value : claimList.get()) {
-            if (!claim.equals(value) && claim.intersects(value, true)) {
+            if (!claim.equals(value) && (claim.intersects(value, true) || value.intersects(claim, true))) {
                 return true;
             }
         }
@@ -211,7 +212,8 @@ public class ClaimManager {
                 listTag.forEach(claimTag -> {
                     Claim claim = new Claim();
                     UUID uuid;
-                    if(((CompoundTag) claimTag).contains("top_owner")) uuid = ((CompoundTag) claimTag).getUuid("top_owner");
+                    if (((CompoundTag) claimTag).contains("top_owner"))
+                        uuid = ((CompoundTag) claimTag).getUuid("top_owner");
                     else uuid = new UUID(0, 0);
                     claim.fromTag(uuid, (CompoundTag) claimTag);
                     claimList.add(claim);
