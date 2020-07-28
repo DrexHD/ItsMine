@@ -6,11 +6,13 @@ import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ChatColor;
 import me.drexhd.itsmine.util.ClaimUtil;
+import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.PlaySoundIdS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
@@ -65,9 +67,9 @@ public abstract class EntityMixin {
                         if (ClaimUtil.getParentClaim(claim).banManager.isBanned(player.getUuid())) {
                             if (pclaim != null && ClaimUtil.getParentClaim(pclaim).banManager.isBanned(player.getUuid())) {
                                 BlockPos loc = ItsMineConfig.main().spawnSection().getBlockPos();
-                                player.teleport(loc.getX(), loc.getY(), loc.getZ());
+                                serverPlayerEntity.teleport((ServerWorld) WorldUtil.DEFAULT_DIMENSION, loc.getX(), loc.getY(), loc.getZ(), player.yaw,player.pitch);
                             } else {
-                                player.teleport(pos.x, pos.y, pos.z);
+                                serverPlayerEntity.teleport(pos.x, pos.y, pos.z);
                             }
                             message = "&cYou can't enter this claim, because you've been banned from it.";
                         } else {

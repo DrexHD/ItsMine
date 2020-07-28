@@ -9,8 +9,10 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.command.Command;
+import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -67,7 +69,9 @@ public class BanCommand extends Command implements Admin, Other, Subzone {
                 BlockPos loc = ItsMineConfig.main().spawnSection().getBlockPos();
                 getOnlineUser(uuid).ifPresent(player -> {
                     player.sendSystemMessage(new LiteralText("You have been banned from " + claim.name + "!").formatted(Formatting.RED), player.getUuid());
-                    player.teleport(loc.getX(), loc.getY(), loc.getZ());
+                    if (claim.includesPosition(player.getBlockPos())) {
+                        player.teleport((ServerWorld) WorldUtil.DEFAULT_DIMENSION, loc.getX(), loc.getY(), loc.getZ(), player.yaw,player.pitch);
+                    }
                 });
             } else {
                 claim.banManager.unban(uuid);

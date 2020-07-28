@@ -14,7 +14,7 @@ public class WorldUtil {
 
     private static final List<RegistryKey<World>> worldRegistryKeys = Lists.newArrayList();
     private static RegistryKey<World> DEFAULT = World.OVERWORLD;
-    private static World DEFAULT_DIMENSION = server().getWorld(DEFAULT);
+    public static World DEFAULT_DIMENSION = server().getWorld(DEFAULT);
 
     static {
         worldRegistryKeys.addAll(server().getWorldRegistryKeys());
