@@ -2,9 +2,8 @@ package me.drexhd.itsmine.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import me.drexhd.itsmine.command.updated.Admin;
-import me.drexhd.itsmine.command.updated.Other;
-import me.drexhd.itsmine.command.updated.Subzone;
+import me.drexhd.itsmine.command.updated.*;
+import me.drexhd.itsmine.command.updated.admin.*;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.ArrayList;
@@ -19,31 +18,32 @@ public class CommandManager {
     public static void register() {
         LiteralArgumentBuilder<ServerCommandSource> main = LiteralArgumentBuilder.literal("itsmine");
         LiteralArgumentBuilder<ServerCommandSource> alias = LiteralArgumentBuilder.literal("claim");
-        addCommand(new me.drexhd.itsmine.command.updated.BanCommand("ban", true));
-        addCommand(new me.drexhd.itsmine.command.updated.BanCommand("unban", false));
-        addCommand(new me.drexhd.itsmine.command.updated.BannedCommand("banned"));
-        addCommand(new me.drexhd.itsmine.command.updated.BlockCommand("blocks"));
-        addCommand(new me.drexhd.itsmine.command.updated.CreateCommand("create"));
-        addCommand(new me.drexhd.itsmine.command.updated.ExpandCommand("expand", true));
-        addCommand(new me.drexhd.itsmine.command.updated.ExpandCommand("shrink", false));
-        addCommand(new me.drexhd.itsmine.command.updated.FlagCommand("flags"));
-        addCommand(new me.drexhd.itsmine.command.updated.FlyCommand("fly"));
-        addCommand(new me.drexhd.itsmine.command.updated.HelpCommand("help"));
-        addCommand(new me.drexhd.itsmine.command.updated.InfoCommand("info"));
-        addCommand(new me.drexhd.itsmine.command.updated.ListCommand("list"));
-        addCommand(new me.drexhd.itsmine.command.updated.MessageCommand("message"));
-        addCommand(new me.drexhd.itsmine.command.updated.PermissionCommand("permissions"));
-        addCommand(new me.drexhd.itsmine.command.updated.RemoveCommand("remove"));
-        addCommand(new me.drexhd.itsmine.command.updated.RenameCommand("rename"));
-        addCommand(new me.drexhd.itsmine.command.updated.RentableCommand("rentable"));
-        addCommand(new me.drexhd.itsmine.command.updated.RentCommand("rent"));
-        addCommand(new me.drexhd.itsmine.command.updated.RevenueCommand("revenue"));
-        addCommand(new me.drexhd.itsmine.command.updated.ShowCommand("show", true));
-        addCommand(new me.drexhd.itsmine.command.updated.ShowCommand("hide", false));
-        addCommand(new me.drexhd.itsmine.command.updated.StickCommand("stick"));
-        addCommand(new me.drexhd.itsmine.command.updated.TrustCommand("trust", true));
-        addCommand(new me.drexhd.itsmine.command.updated.TrustCommand("distrust", false));
-        addCommand(new me.drexhd.itsmine.command.updated.TrustedCommand("trusted"));
+        addCommand(new BanCommand("ban", true));
+        addCommand(new BanCommand("unban", false));
+        addCommand(new BannedCommand("banned"));
+        addCommand(new BlockCommand("blocks"));
+        addCommand(new ColorCommand("color"));
+        addCommand(new CreateCommand("create"));
+        addCommand(new ExpandCommand("expand", true));
+        addCommand(new ExpandCommand("shrink", false));
+        addCommand(new FlagCommand("flags"));
+        addCommand(new FlyCommand("fly"));
+        addCommand(new HelpCommand("help"));
+        addCommand(new InfoCommand("info"));
+        addCommand(new ListCommand("list"));
+        addCommand(new MessageCommand("message"));
+        addCommand(new PermissionCommand("permissions"));
+        addCommand(new RemoveCommand("remove"));
+        addCommand(new RenameCommand("rename"));
+        addCommand(new RentableCommand("rentable"));
+        addCommand(new RentCommand("rent"));
+        addCommand(new RevenueCommand("revenue"));
+        addCommand(new ShowCommand("show", true));
+        addCommand(new ShowCommand("hide", false));
+        addCommand(new StickCommand("stick"));
+        addCommand(new TrustCommand("trust", true));
+        addCommand(new TrustCommand("distrust", false));
+        addCommand(new TrustedCommand("trusted"));
         register(main);
         register(alias);
         dispatcher.register(main);
@@ -86,6 +86,14 @@ public class CommandManager {
                 cmd.register(subzone);
             }
         }
+
+        new BlocksCommand(true).register(admin);
+        new BlocksCommand(false).register(admin);
+        new IgnoreCommand("ignore").register(admin);
+        new ModInfoCommand("info").register(admin);
+        new OwnerCommand("setOwner").register(admin);
+        new ReloadCommand("reload").register(admin);
+
         literal.then(admin);
         literal.then(other);
         literal.then(subzone);

@@ -26,7 +26,7 @@ public class ReloadCommand extends Command {
     }
 
     @Override
-    protected void register(LiteralArgumentBuilder<ServerCommandSource> command) {
+    public void register(LiteralArgumentBuilder<ServerCommandSource> command) {
         literal().executes(this::reload);
         command.then(literal());
     }

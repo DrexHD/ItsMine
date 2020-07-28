@@ -342,14 +342,6 @@ public class Claim {
             permissionManager = new PermissionManager();
             permissionManager.fromNBT(permission);
 
-/*            CompoundTag ban = tag.getCompound("bans");
-            System.out.println(ban);
-            for (int i = 0; i < 50; i++) {
-                ListTag bans = tag.getList("bans", i);
-                System.out.println("i: " + i);
-                System.out.println("bans: " + bans);
-                System.out.println("banSize: " + bans.size());
-            }*/
             ListTag bans = tag.getList("bans", 8);
             banManager = new BanManager();
             banManager.fromNBT(bans);

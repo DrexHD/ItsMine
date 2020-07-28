@@ -35,12 +35,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 
 public abstract class Command {
 
-    protected final String literal;
-    protected boolean others = false;
-    protected boolean admin = false;
-    protected boolean subzones = false;
-    protected boolean suggestCurrent = true;
-
     public static final SuggestionProvider<ServerCommandSource> TIME_PROVIDER = (source, builder) -> {
         List<String> strings = new ArrayList<>();
         if (builder.getRemaining().isEmpty()) {
@@ -57,6 +51,7 @@ public abstract class Command {
         }
         return CommandSource.suggestMatching(strings, builder);
     };
+    protected final String literal;
     public SuggestionProvider<ServerCommandSource> USER_PROVIDER = (source, builder) -> {
         List<String> strings = new ArrayList<>();
         for (ServerPlayerEntity player : server().getPlayerManager().getPlayerList()) {
@@ -64,7 +59,8 @@ public abstract class Command {
         }
         return CommandSource.suggestMatching(strings, builder);
     };
-    protected LiteralArgumentBuilder<ServerCommandSource> literalArgument;
+    protected boolean others = false;
+    protected boolean admin = false;
     public SuggestionProvider<ServerCommandSource> OWNER_PROVIDER = (source, builder) -> {
         List<String> strings = new ArrayList<>();
         if (admin) strings.add("-server");
@@ -73,6 +69,8 @@ public abstract class Command {
         }
         return CommandSource.suggestMatching(strings, builder);
     };
+    protected boolean subzones = false;
+    protected boolean suggestCurrent = true;
     public final SuggestionProvider<ServerCommandSource> CLAIM_PROVIDER = (source, builder) -> {
         UUID uuid = getOwner(source);
         ServerPlayerEntity player = source.getSource().getPlayer();
@@ -86,6 +84,7 @@ public abstract class Command {
         }
         return CommandSource.suggestMatching(names, builder);
     };
+    protected LiteralArgumentBuilder<ServerCommandSource> literalArgument;
 
     public Command(final String literal) {
         this.literal = literal;
@@ -172,6 +171,17 @@ public abstract class Command {
         throw new SimpleCommandExceptionType(new LiteralText("You don't own a claim with that name, use /claim other if you want to modify a claim belonging to someone else!")).create();
     }
 
+    public <V> boolean isArgumentSet(CommandContext<ServerCommandSource> context, String name, final Class<V> clazz) {
+        try {
+            context.getArgument(name, clazz);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+
+
     public Claim getClaimAt(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
         Claim claim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.getServerWorld().getDimension());
@@ -199,6 +209,8 @@ public abstract class Command {
         GameProfile gameProfile = server().getUserCache().getByUuid(uuid);
         if (gameProfile != null && gameProfile.isComplete()) {
             return gameProfile.getName();
+        } else if (uuid.equals(ClaimManager.serverUUID)) {
+            return "Server";
         } else {
             return uuid.toString();
         }
@@ -268,15 +280,14 @@ public abstract class Command {
             boolean nextColor = false;
             MutableText perms = new LiteralText("");
 
-            for (Permission value : Permission.values()) {
-                if (claim.permissionManager.hasPermission(uuid, value.id, null)) {
-                    Formatting formatting = nextColor ? Formatting.GREEN : Formatting.DARK_GREEN;
-                    perms.append(new LiteralText(value.id).formatted(formatting)).append(new LiteralText(" "));
+            for (Permission permission : Permission.values()) {
+                if (claim.permissionManager.playerPermissions.get(uuid).hasPermission(permission.id)) {
+                    perms.append(new LiteralText(permission.id + " ").formatted(Formatting.GREEN));
                     allowed++;
                 } else {
-                    Formatting formatting = nextColor ? Formatting.RED : Formatting.DARK_RED;
-                    perms.append(new LiteralText(value.id).formatted(formatting)).append(new LiteralText(" "));
+                    perms.append(new LiteralText(permission.id + " ").formatted(Formatting.RED));
                 }
+
                 if (i % 3 == 0) perms.append(new LiteralText("\n"));
                 i++;
                 nextColor = !nextColor;
@@ -314,13 +325,17 @@ public abstract class Command {
                 case 's':
                     break;
                 case 'm':
-                    time = time * 60; break;
+                    time = time * 60;
+                    break;
                 case 'h':
-                    time = time * 60 * 60; break;
+                    time = time * 60 * 60;
+                    break;
                 case 'd':
-                    time = time * 60 * 60 * 24; break;
+                    time = time * 60 * 60 * 24;
+                    break;
                 case 'w':
-                    time = time * 60 * 60 * 24 * 4; break;
+                    time = time * 60 * 60 * 24 * 4;
+                    break;
             }
             return time;
         } else {

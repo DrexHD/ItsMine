@@ -30,8 +30,6 @@ public class BanManager {
     public void fromNBT(ListTag tag) {
         bannedPlayers.clear();
         for (int i = 0; i < tag.size(); i++) {
-            System.out.println("i: " + i);
-            System.out.println("val: " + UUID.fromString(tag.getString(i)));
             bannedPlayers.add(UUID.fromString(tag.getString(i)));
         }
     }
