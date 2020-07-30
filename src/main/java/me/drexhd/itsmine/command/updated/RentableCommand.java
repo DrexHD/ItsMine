@@ -13,8 +13,8 @@ import me.drexhd.itsmine.util.ArgumentUtil;
 import me.drexhd.itsmine.util.ItemUtil;
 import me.drexhd.itsmine.util.MessageUtil;
 import me.drexhd.itsmine.util.TimeUtil;
-import net.minecraft.command.arguments.ItemStackArgument;
-import net.minecraft.command.arguments.ItemStackArgumentType;
+import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 

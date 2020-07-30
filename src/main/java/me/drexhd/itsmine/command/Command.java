@@ -265,7 +265,7 @@ public abstract class Command {
                 owner = new LiteralText(profile.getName());
             } else {
                 owner = new LiteralText(uuid.toString())
-                        .styled((style) -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy")))
+                        .styled((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy")))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString())));
             }
 
@@ -307,7 +307,7 @@ public abstract class Command {
                     .append(new LiteralText(")").formatted(Formatting.GOLD))
             );
 
-            pText.styled((style) -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
+            pText.styled((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hover)));
             text.append(pText).append(new LiteralText("\n"));
         });
 

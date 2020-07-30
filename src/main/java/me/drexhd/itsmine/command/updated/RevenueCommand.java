@@ -84,7 +84,7 @@ public class RevenueCommand extends Command {
                         .append(new LiteralText(" "))
                         .append(new LiteralText(ItemUtil.toName(currency, integer)))
                         .append(new LiteralText(" ")).formatted(color.get() ? Formatting.GOLD : Formatting.YELLOW)).styled(style ->
-                        style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to claim revenue!").formatted(Formatting.GREEN)))
+                        style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to claim revenue!").formatted(Formatting.GREEN)))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/claim revenue " + claim.name + " true")));
                 color.set(!color.get());
             });

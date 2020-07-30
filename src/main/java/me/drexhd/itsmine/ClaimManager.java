@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.permission.DefaultPermissionList;
 import me.drexhd.itsmine.util.ArgumentUtil;
-import net.minecraft.command.arguments.GameProfileArgumentType;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

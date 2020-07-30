@@ -7,7 +7,7 @@ import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.util.ArgumentUtil;
 import me.drexhd.itsmine.util.ClaimUtil;
-import net.minecraft.command.arguments.GameProfileArgumentType;
+import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
