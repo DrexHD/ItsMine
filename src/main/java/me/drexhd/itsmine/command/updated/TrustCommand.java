@@ -56,7 +56,7 @@ public class TrustCommand extends Command implements Admin, Other, Subzone {
         Claim claim = getClaim(context);
         UUID uuid = getUser(context);
         String name = getName(uuid);
-        validatePermission(claim, uuid, "modify", "permissions");
+        validatePermission(claim, context.getSource().getPlayer().getUuid(), "modify", "permissions");
         if (trust) {
             claim.permissionManager.playerPermissions.put(uuid, new InvertedMap());
         } else {

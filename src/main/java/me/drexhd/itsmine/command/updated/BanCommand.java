@@ -60,7 +60,7 @@ public class BanCommand extends Command implements Admin, Other, Subzone {
         Claim claim = getClaim(context);
         UUID uuid = getUser(context);
         String name = getName(uuid);
-        validatePermission(claim, uuid, "modify", "ban");
+        validatePermission(claim, context.getSource().getPlayer().getUuid(), "modify", "ban");
         if ((claim.banManager.isBanned(uuid) && ban) || (!claim.banManager.isBanned(uuid) && !ban)) {
             throw new SimpleCommandExceptionType(new LiteralText(name + " is " + (ban ? "already" : "not") + " banned!")).create();
         } else {

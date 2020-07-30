@@ -129,8 +129,9 @@ public class Message {
         this.text += text;
     }
 
-    public void addVar(String var, String value) {
+    public Message addVar(String var, String value) {
         translations.add(var, value);
+        return this;
     }
 
     public Text build() {

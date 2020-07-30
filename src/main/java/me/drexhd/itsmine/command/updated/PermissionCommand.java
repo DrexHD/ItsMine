@@ -68,6 +68,7 @@ public class PermissionCommand extends Command implements Admin, Other, Subzone 
         String formattedValue = value ? messageSection.getTrue() : messageSection.getFalse();
         ServerCommandSource source = context.getSource();
         if (claim.canModifySettings(source.getPlayer().getUuid()) || admin) {
+//            source.sendFeedback(new Message(ItsMineConfig.main().message().permissionSet).addVar("%claim%", claim.name).addVar("%permission%", input).addVar("%value%", formattedValue).addVar("%player%", name).build(), false)
             MessageUtil.sendTranslatableMessage(source, MessageUtil.createMap("%claim%", claim.name, "%permission%", input, "%value%", formattedValue, "%player%", name), ItsMineConfig.main().message().permissionSet);
             claim.permissionManager.setPermission(uuid, input, value);
         }

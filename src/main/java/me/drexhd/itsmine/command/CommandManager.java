@@ -2,6 +2,7 @@ package me.drexhd.itsmine.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.command.updated.*;
 import me.drexhd.itsmine.command.updated.admin.*;
 import net.minecraft.server.command.ServerCommandSource;
@@ -60,6 +61,7 @@ public class CommandManager {
 
     public static void register(LiteralArgumentBuilder<ServerCommandSource> literal) {
         LiteralArgumentBuilder<ServerCommandSource> admin = LiteralArgumentBuilder.literal("admin");
+        admin.requires(src -> ItsMine.permissions().hasPermission(src, "admin", 2));
         LiteralArgumentBuilder<ServerCommandSource> other = LiteralArgumentBuilder.literal("other");
         LiteralArgumentBuilder<ServerCommandSource> subzone = LiteralArgumentBuilder.literal("subzone");
         for (Command command : commands) {
