@@ -207,9 +207,6 @@ public class MessageUtil {
         return ItsMineConfig.getMainNode().getNode(path).getString();
     }
 
-    public static void debug(String debug) {
-        if (SharedConstants.isDevelopment) LOGGER.info(debug);
-    }
 
     public static void log(String log) {
         LOGGER.info(log);

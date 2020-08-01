@@ -7,7 +7,6 @@ import me.drexhd.itsmine.MonitorableWorld;
 import me.drexhd.itsmine.claim.flag.FlagManager;
 import me.drexhd.itsmine.claim.permission.PermissionManager;
 import me.drexhd.itsmine.util.ClaimUtil;
-import me.drexhd.itsmine.util.MessageUtil;
 import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -143,7 +142,6 @@ public class Claim {
      */
     public boolean hasPermission(UUID player, String parent, @Nullable String child) {
         String permission = child == null ? parent : parent + "." + child;
-        MessageUtil.debug(this.name + ": Checking " + permission + " for " + player + " (hasPermission)");
         if (player == null) return false;
         UUID tenant = this.rentManager.getTenant();
         if (tenant != null && tenant.equals(player) && !parent.equalsIgnoreCase("modify")) {
