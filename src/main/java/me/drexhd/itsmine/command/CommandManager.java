@@ -95,6 +95,7 @@ public class CommandManager {
         new ModInfoCommand("info").register(admin);
         new OwnerCommand("setOwner").register(admin);
         new ReloadCommand("reload").register(admin);
+        new DefaultPermCommand("defaultpermission").register(admin);
 
         literal.then(admin);
         literal.then(other);

@@ -145,8 +145,10 @@ public abstract class Command {
     }
 
     public void validatePermission(Claim claim, UUID uuid, String parent, @Nullable String child) throws CommandSyntaxException {
-        if (!claim.hasPermission(uuid, parent, child) && !admin)
+
+        if (!(claim.hasPermission(uuid, parent, child) || admin)) {
             throw new SimpleCommandExceptionType(new LiteralText("You don't have permission to do this!")).create();
+        }
     }
 
     public RequiredArgumentBuilder<ServerCommandSource, String> thenClaim() {
