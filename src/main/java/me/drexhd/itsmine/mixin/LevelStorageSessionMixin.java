@@ -4,7 +4,7 @@ import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.util.MessageUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.util.registry.RegistryTracker;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.world.SaveProperties;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.spongepowered.asm.mixin.Final;
@@ -26,7 +26,7 @@ public class LevelStorageSessionMixin {
     private Path directory;
 
     @Inject(method = "method_27426", at = @At("HEAD"))
-    public void saveWorld(RegistryTracker registryTracker, SaveProperties saveProperties, CompoundTag compoundTag, CallbackInfo ci) {
+    public void saveWorld(DynamicRegistryManager dynamicRegistryManager, SaveProperties saveProperties, CompoundTag compoundTag, CallbackInfo ci) {
         if (ClaimManager.INSTANCE != null) {
             File claimDataFile = new File(directory.toFile(), "claims.dat");
             if (claimDataFile.exists()) {

@@ -97,7 +97,7 @@ public class CreateCommand extends Command implements Admin, Subzone {
                         MutableText message = new LiteralText("")
                                 .append(new LiteralText("Your claim was created").formatted(Formatting.GREEN))
                                 .append(new LiteralText("(Area: " + sub.getX() + "x" + sub.getY() + "x" + sub.getZ() + ")")
-                                        .styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(subInt + " blocks").formatted(Formatting.YELLOW)))));
+                                        .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText(subInt + " blocks").formatted(Formatting.YELLOW)))));
                         source.sendFeedback(message, false);
                         ClaimUtil.blocksLeft(source);
                         showClaim(source, claim, false, null);

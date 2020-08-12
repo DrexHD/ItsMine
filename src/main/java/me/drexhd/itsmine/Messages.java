@@ -209,7 +209,7 @@ public class Messages {
                         if (nextPartly) formatting = Formatting.YELLOW;
                         else formatting = Formatting.GOLD;
                         nextPartly = !nextPartly;
-                        claimPermissions.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(formatting).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subPerm))));
+                        claimPermissions.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(formatting).styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subPerm))));
                     }
                 }
             }
@@ -232,7 +232,7 @@ public class Messages {
                         hasNodes = true;
                     }
                 }
-                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
+                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
             }
             return text;
         }
@@ -253,7 +253,7 @@ public class Messages {
                         hasNodes = true;
                     }
                 }
-                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
+                if (value || hasNodes) text.append(new LiteralText(" ")).append(new LiteralText(permission.id).formatted(color).styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, subNodes))));
             }
             return text;
         }

@@ -55,7 +55,7 @@ public class EntitiesCommand {
             });
             if(entityMap.size() > 0){
                 message.append(new LiteralText(spawnGroup.getName()).styled(style -> {
-                    return style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, entities)).withFormatting(Formatting.GOLD);
+                    return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, entities)).withFormatting(Formatting.GOLD);
                 }).append(" "));
             }
         }

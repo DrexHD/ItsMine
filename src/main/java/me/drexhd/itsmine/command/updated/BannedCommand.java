@@ -49,7 +49,7 @@ public class BannedCommand extends Command implements Other, Subzone {
                 owner = new LiteralText(profile.getName());
             } else {
                 owner = new LiteralText(uuid.toString())
-                        .styled((style) -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy")))
+                        .styled((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to Copy")))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString())));
             }
 

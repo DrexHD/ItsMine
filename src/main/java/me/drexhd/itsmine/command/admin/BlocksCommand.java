@@ -7,7 +7,7 @@ import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMine;
 import me.drexhd.itsmine.util.PermissionUtil;
 import net.minecraft.command.EntitySelector;
-import net.minecraft.command.arguments.EntityArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;

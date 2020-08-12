@@ -30,7 +30,7 @@ public class Claim {
     public BlockPos min, max;
     public @Nullable
     BlockPos tpPos;
-    public DimensionType dimension = DimensionType.getOverworldDimensionType();
+    public DimensionType dimension;
     public List<Claim> subzones = new ArrayList<>();
     public FlagManager flagManager = new FlagManager();
     public PermissionManager permissionManager = new PermissionManager();

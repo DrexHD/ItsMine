@@ -64,7 +64,7 @@ public class ListCommand extends Command implements Admin{
                             nextColor2 = !nextColor2;
                         }
                     }
-                    return style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/claim info " + claim.name)).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
+                    return style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/claim info " + claim.name)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
                 });
 
                 nextColor = !nextColor;
