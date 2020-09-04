@@ -12,8 +12,10 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -24,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements ClaimShower, ClaimPlayerEntity {
+
+    @Shadow private boolean reducedDebugInfo;
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType_1, World world_1) {
         super(entityType_1, world_1);
@@ -52,6 +56,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements ClaimSho
         if (claim != null && !EntityUtil.canDamage(((PlayerEntity) (Object) this).getUuid(), claim, entity)) {
             playerEntity_1.sendSystemMessage(Messages.MSG_DAMAGE_ENTITY, playerEntity_1.getUuid());
             ci.cancel();
+        }
+    }
+
+    @Redirect(method = "dropInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
+    public boolean keepInventory(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> rule) {
+        Claim claim = ClaimManager.INSTANCE.getClaimAt(this.getBlockPos(), this.world.getDimension());
+        if (claim != null) {
+            return claim.flagManager.hasFlag("keepinventory");
+        } else {
+            return gameRules.getBoolean(rule);
         }
     }
 

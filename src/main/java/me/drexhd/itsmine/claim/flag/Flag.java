@@ -8,6 +8,7 @@ public enum Flag {
     MOB_SPAWNING("mob_spawn", false),
     FLUID_CROSSES_BORDERS("fluid_crosses_borders", false),
     ENTER_SOUND("enter_sound", false),
+    KEEPINVENTORY("keepinventory", true),
     FROST_WALKER("frost_walker", false);
 
     private String id;
