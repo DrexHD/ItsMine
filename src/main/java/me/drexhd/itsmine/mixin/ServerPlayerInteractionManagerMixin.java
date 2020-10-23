@@ -87,6 +87,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
                             (BlockUtil.isDoor(block) && claim.hasPermission(uuid, "interact_block", "DOORS")) ||
                             (BlockUtil.isContainer(block) && claim.hasPermission(uuid, "interact_block", "CONTAINERS")) ||
                             (BlockUtil.isSign(block) && claim.hasPermission(uuid, "interact_block", "SIGNS")) ||
+                            (BlockUtil.isGateWay(block) && claim.hasPermission(uuid, "interact_block", "GATEWAYS")) ||
                             (BlockUtil.isShulkerBox(block) && claim.hasPermission(uuid, "interact_block", "SHULKERBOXES"))) {
                         return blockState.onUse(world, player, hand, hit);
                     } else {

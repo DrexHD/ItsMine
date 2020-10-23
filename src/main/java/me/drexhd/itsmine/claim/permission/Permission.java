@@ -77,6 +77,7 @@ public enum Permission {
             this.add("DOORS");
             this.add("BUTTONS");
             this.add("CONTAINERS");
+            this.add("GATEWAYS");
             this.add("SIGNS");
             this.add("SHULKERBOXES");
             this.remove("jigsaw");

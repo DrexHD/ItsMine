@@ -53,6 +53,10 @@ public class BlockUtil {
         return block instanceof AbstractButtonBlock;
     }
 
+    public static boolean isGateWay(Block block) {
+        return block instanceof FenceGateBlock;
+    }
+
     public static boolean isDoor(Block block) {
         return block instanceof DoorBlock;
     }
@@ -83,6 +87,7 @@ public class BlockUtil {
                 isContainer(block) ||
                 isSign(block) ||
                 isBed(block) ||
+                isGateWay(block) ||
                 isLever(block);
     }
 }
