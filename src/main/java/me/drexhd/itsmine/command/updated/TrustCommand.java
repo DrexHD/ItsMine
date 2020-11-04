@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.permission.map.InvertedMap;
 import me.drexhd.itsmine.command.Command;
-import net.minecraft.server.command.CommandSource;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;

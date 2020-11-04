@@ -21,8 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.RayTraceContext;
-import net.minecraft.world.RayTraceContext.FluidHandling;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,7 +46,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
 
     public BlockPos blockPos;
 
-    public BlockHitResult rayTrace(World world, PlayerEntity player, FluidHandling fluidHandling) {
+    public BlockHitResult rayTrace(World world, PlayerEntity player, RaycastContext.FluidHandling fluidHandling) {
         float f = player.pitch;
         float g = player.yaw;
         Vec3d vec3d = player.getCameraPosVec(1.0F);
@@ -59,7 +58,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
         float n = h * j;
         double d = 5.0D;
         Vec3d vec3d2 = vec3d.add((double) l * 5.0D, (double) k * 5.0D, (double) n * 5.0D);
-        return world.rayTrace(new RayTraceContext(vec3d, vec3d2, RayTraceContext.ShapeType.OUTLINE, fluidHandling, player));
+        return world.raycast(new RaycastContext(vec3d, vec3d2, RaycastContext.ShapeType.OUTLINE, fluidHandling, player));
     }
 
     //This method injects at the beginning of the method to get the block position
@@ -151,7 +150,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
     @Redirect(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean canBreak(ServerWorld world, PlayerEntity player, BlockPos pos) {
         Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(player);
-        if ((player.inventory.getMainHandStack().getItem() == Items.STICK && !player.isSneaking()) || (player.inventory.getMainHandStack().getItem() == Items.AIR) && player.isSneaking()) {
+        if ((player.method_31548().getMainHandStack().getItem() == Items.STICK && !player.isSneaking()) || (player.method_31548().getMainHandStack().getItem() == Items.AIR) && player.isSneaking()) {
             if (posPair != null) {
                 posPair = new Pair<>(posPair.getLeft(), pos);
                 ClaimManager.INSTANCE.stickPositions.put(player, posPair);
@@ -182,7 +181,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
         Item item = itemStack.getItem();
         BlockPos pos = player.getBlockPos();
         if (ItemUtil.isBoat(item)) {
-            HitResult hitResult = rayTrace(world, player, FluidHandling.ANY);
+            HitResult hitResult = rayTrace(world, player, RaycastContext.FluidHandling.ANY);
             pos = new BlockPos(hitResult.getPos().getX(), hitResult.getPos().getY(), hitResult.getPos().getZ());
         }
         Claim claim = ClaimManager.INSTANCE.getClaimAt(pos, world.getDimension());

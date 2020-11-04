@@ -33,10 +33,7 @@ import java.util.function.Supplier;
  * @author Indigo Amann
  */
 @Mixin(ServerWorld.class)
-public abstract class ServerWorldMixin extends World implements MonitorableWorld {
-    @Shadow
-    @Final
-    private Map<UUID, Entity> entitiesByUuid;
+public abstract class ServerWorldMixin extends World {
 
     protected ServerWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryKey, DimensionType dimensionType, Supplier<Profiler> supplier, boolean bl, boolean bl2, long l) {
         super(properties, registryKey, dimensionType, supplier, bl, bl2, l);
@@ -64,18 +61,5 @@ public abstract class ServerWorldMixin extends World implements MonitorableWorld
             ((ClaimPlayerEntity) playerEntity).tickMessageCooldown();
         });
 
-    }
-
-
-    @Override
-    public int loadedEntities() {
-        if (this.entitiesByUuid == null)
-            return -1;
-        return this.entitiesByUuid.size();
-    }
-
-    @Override
-    public Map<UUID, Entity> EntityList() {
-        return entitiesByUuid;
     }
 }

@@ -30,8 +30,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class EntityMixin {
     @Shadow
     public World world;
-    @Shadow
-    public boolean removed;
     public Vec3d pos;
     private Claim pclaim = null;
 
@@ -106,19 +104,19 @@ public abstract class EntityMixin {
                 return;
             }
 
-            boolean oldAbility = player.abilities.allowFlying;
+            boolean oldAbility = player.method_31549().allowFlying;
             Claim claim = ClaimManager.INSTANCE.getClaimAt(player.getBlockPos(), player.world.getDimension());
 
             if (player instanceof ServerPlayerEntity) {
-                if (player.abilities.allowFlying &&
+                if (player.method_31549().allowFlying &&
                         shouldChange(player) &&
                         (!ClaimManager.INSTANCE.flyers.contains(player.getUuid()) ||
                                 claim == null ||
                                 !claim.hasPermission(player.getGameProfile().getId(), "flight", null) ||
                                 !Functions.canFly((ServerPlayerEntity) player))
                 ) {
-                    player.abilities.allowFlying = false;
-                    player.abilities.flying = false;
+                    player.method_31549().allowFlying = false;
+                    player.method_31549().flying = false;
                     Functions.setClaimFlying(player.getGameProfile().getId(), false);
 /*                    World world = player.getEntityWorld();
                     if (world.getBlockState(player.getBlockPos().down(5)).isAir() && !player.isOnGround()) {
@@ -126,17 +124,17 @@ public abstract class EntityMixin {
                         player.teleport(pos.getX(), pos.getY(), pos.getZ());
                     }*/
                 } else if (
-                        !player.abilities.allowFlying &&
+                        !player.method_31549().allowFlying &&
                                 ClaimManager.INSTANCE.flyers.contains(player.getUuid()) &&
                                 shouldChange(player) &&
                                 claim != null
                                 && claim.hasPermission(player.getUuid(), "flight", null)
                                 && Functions.canFly((ServerPlayerEntity) player)
                 ) {
-                    player.abilities.allowFlying = true;
+                    player.method_31549().allowFlying = true;
                 }
 
-                if (player.abilities.allowFlying != oldAbility) {
+                if (player.method_31549().allowFlying != oldAbility) {
                     player.sendAbilitiesUpdate();
                 }
             }

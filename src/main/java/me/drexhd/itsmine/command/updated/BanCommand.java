@@ -10,7 +10,7 @@ import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.command.Command;
 import me.drexhd.itsmine.util.WorldUtil;
-import net.minecraft.server.command.CommandSource;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;

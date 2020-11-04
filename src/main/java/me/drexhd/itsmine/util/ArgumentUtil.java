@@ -14,7 +14,7 @@ import me.drexhd.itsmine.Messages;
 import me.drexhd.itsmine.claim.Claim;
 import me.drexhd.itsmine.claim.flag.Flag;
 import me.drexhd.itsmine.claim.permission.Permission;
-import net.minecraft.server.command.CommandSource;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Direction;

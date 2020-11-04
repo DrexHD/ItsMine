@@ -25,7 +25,7 @@ public class LevelStorageSessionMixin {
     @Final
     private Path directory;
 
-    @Inject(method = "method_27426", at = @At("HEAD"))
+    @Inject(method = "backupLevelDataFile(Lnet/minecraft/util/registry/DynamicRegistryManager;Lnet/minecraft/world/SaveProperties;Lnet/minecraft/nbt/CompoundTag;)V", at = @At("HEAD"))
     public void saveWorld(DynamicRegistryManager dynamicRegistryManager, SaveProperties saveProperties, CompoundTag compoundTag, CallbackInfo ci) {
         if (ClaimManager.INSTANCE != null) {
             File claimDataFile = new File(directory.toFile(), "claims.dat");
