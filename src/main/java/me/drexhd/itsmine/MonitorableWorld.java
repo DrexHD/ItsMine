@@ -1,3 +1,4 @@
+/*
 package me.drexhd.itsmine;
 
 import net.minecraft.entity.Entity;
@@ -12,3 +13,4 @@ public interface MonitorableWorld {
 
     Map<UUID, Entity> EntityList();
 }
+*/

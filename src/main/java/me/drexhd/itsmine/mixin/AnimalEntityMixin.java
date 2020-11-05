@@ -1,3 +1,4 @@
+/*
 package me.drexhd.itsmine.mixin;
 
 import me.drexhd.itsmine.ItsMineConfig;
@@ -46,3 +47,4 @@ public abstract class AnimalEntityMixin {
         }
     }
 }
+*/

@@ -3,8 +3,6 @@ package me.drexhd.itsmine.mixin;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ClaimPlayerEntity;
 import me.drexhd.itsmine.Functions;
-import me.drexhd.itsmine.MonitorableWorld;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.server.PlayerManager;
@@ -15,7 +13,6 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 

@@ -3,14 +3,12 @@ package me.drexhd.itsmine.claim;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.ItsMineConfig;
 import me.drexhd.itsmine.Messages;
-import me.drexhd.itsmine.MonitorableWorld;
 import me.drexhd.itsmine.claim.flag.FlagManager;
 import me.drexhd.itsmine.claim.permission.PermissionManager;
 import me.drexhd.itsmine.util.ClaimUtil;
 import me.drexhd.itsmine.util.WorldUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -20,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Indigo Amann
@@ -93,7 +90,7 @@ public class Claim {
         return intersects(claim, false);
     }
 
-    public int getEntities(ServerWorld world) {
+/*    public int getEntities(ServerWorld world) {
         AtomicReference<Integer> entities = new AtomicReference<>();
         entities.set(0);
         MonitorableWorld monitorableWorld = (MonitorableWorld) world;
@@ -103,7 +100,7 @@ public class Claim {
             }
         });
         return entities.get();
-    }
+    }*/
 
 
     public boolean intersects(Claim claim, boolean checkforsubzone) {

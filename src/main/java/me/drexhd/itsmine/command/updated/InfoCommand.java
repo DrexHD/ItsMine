@@ -57,7 +57,6 @@ public class InfoCommand extends Command implements Other{
         text.append(new LiteralText("Claim Info: " + claim.name).formatted(Formatting.GOLD))
                 .append(new LiteralText("\n"))
                 .append(newInfoLine("Name", new LiteralText(claim.name).formatted(Formatting.WHITE)))
-                .append(newInfoLine("Entities", new LiteralText(String.valueOf(claim.getEntities(source.getWorld()))).formatted(Formatting.AQUA)))
                 .append(newInfoLine("Owner", ownerName.equals("") ?
                         new LiteralText(ownerUUID.toString()).formatted(Formatting.RED, Formatting.ITALIC).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, claim.claimBlockOwner.toString()))) :
                         new LiteralText(ownerName).formatted(Formatting.GOLD)))

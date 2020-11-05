@@ -41,7 +41,7 @@ public class ListAllCommand {
         if(!offline){
             for(ServerPlayerEntity serverPlayerEntity : source.getMinecraftServer().getPlayerManager().getPlayerList()){
                 for(Claim claim : ClaimManager.INSTANCE.getPlayerClaims(serverPlayerEntity.getUuid())){
-                    claimList.add(new LiteralText(claim.name).formatted(Formatting.GOLD).append(new LiteralText(" ")).append(new LiteralText(String.valueOf(claim.getEntities(source.getWorld()))).formatted(Formatting.YELLOW)));
+                    claimList.add(new LiteralText(claim.name).formatted(Formatting.GOLD).append(new LiteralText(" "))/*.append(new LiteralText(String.valueOf(claim.getEntities(source.getWorld()))).formatted(Formatting.YELLOW))*/);
                 }
             }
         } else {

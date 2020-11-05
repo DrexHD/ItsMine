@@ -1,3 +1,4 @@
+/*
 package me.drexhd.itsmine.command.admin;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -64,3 +65,4 @@ public class EntitiesCommand {
     }
 
 }
+*/

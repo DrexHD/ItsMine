@@ -3,12 +3,10 @@ package me.drexhd.itsmine.util;
 import com.mojang.authlib.GameProfile;
 import me.drexhd.itsmine.ClaimManager;
 import me.drexhd.itsmine.Functions;
-import me.drexhd.itsmine.MonitorableWorld;
 import me.drexhd.itsmine.claim.Claim;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ public class EntityUtil {
     }
 
 
-    public static ArrayList<Entity> getEntities(Claim claim) {
+/*    public static ArrayList<Entity> getEntities(Claim claim) {
         ArrayList<Entity> entityList = new ArrayList<>();
         ServerWorld world = WorldUtil.getServerWorld(claim.dimension);
         MonitorableWorld monitorableWorld = (MonitorableWorld) world;
@@ -37,7 +35,7 @@ public class EntityUtil {
             if (claim.includesPosition(entity.getBlockPos())) entityList.add(entity);
         });
         return entityList;
-    }
+    }*/
 
     public static ArrayList<Entity> filterByCategory(ArrayList<Entity> entityList, SpawnGroup spawnGroup) {
         ArrayList<Entity> filteredEntityList = new ArrayList<>();
