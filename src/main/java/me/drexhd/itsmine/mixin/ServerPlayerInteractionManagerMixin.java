@@ -150,7 +150,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
     @Redirect(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;canPlayerModifyAt(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;)Z"))
     public boolean canBreak(ServerWorld world, PlayerEntity player, BlockPos pos) {
         Pair<BlockPos, BlockPos> posPair = ClaimManager.INSTANCE.stickPositions.get(player);
-        if ((player.method_31548().getMainHandStack().getItem() == Items.STICK && !player.isSneaking()) || (player.method_31548().getMainHandStack().getItem() == Items.AIR) && player.isSneaking()) {
+        if ((player.getInventory().getMainHandStack().getItem() == Items.STICK && !player.isSneaking()) || (player.getInventory().getMainHandStack().getItem() == Items.AIR) && player.isSneaking()) {
             if (posPair != null) {
                 posPair = new Pair<>(posPair.getLeft(), pos);
                 ClaimManager.INSTANCE.stickPositions.put(player, posPair);

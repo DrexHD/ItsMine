@@ -208,7 +208,7 @@ public class RentManager {
         CompoundTag currency = new CompoundTag();
         if (this.currency != ItemStack.EMPTY) this.currency.toTag(currency);
         general.put("currency", currency);
-        if (!general.isEmpty()) rent.put("general", general);
+        if (!(general.getSize() == 0)) rent.put("general", general);
 
         /*Claim revenue*/
         if (!this.revenue.isEmpty()) {

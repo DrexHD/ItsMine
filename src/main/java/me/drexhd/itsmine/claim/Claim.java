@@ -323,7 +323,7 @@ public class Claim {
         }
         {
             CompoundTag rent = tag.getCompound("rent");
-            if (!rent.isEmpty()) {
+            if (!(rent.getSize() == 0)) {
                 rentManager = new RentManager();
                 rentManager.fromTag(rent);
             }

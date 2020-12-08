@@ -57,7 +57,7 @@ public class RevenueCommand extends Command {
 
         if (claimrevenue) {
             for (ItemStack itemStack : claim.rentManager.getRevenue()) {
-                source.getPlayer().method_31548().insertStack(itemStack);
+                source.getPlayer().getInventory().insertStack(itemStack);
             }
             claim.rentManager.clearRevenue();
             return 1;
